@@ -1,0 +1,8 @@
+__pycache__
+
+# Dependencies
+venv/
+
+# Environment Variables
+.env
+
