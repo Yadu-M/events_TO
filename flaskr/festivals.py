@@ -17,7 +17,7 @@ package_str = requests.get(url, params = params).json()
 
   
 
-def get_festivals_data() -> list[dict]:
+def fetch_festivals_data() -> list[dict]:
   for meta_data in package_str['result']['resources']:
     
     if meta_data['format'] == 'JSON':
@@ -40,27 +40,25 @@ def get_festivals_data() -> list[dict]:
       # f_data.close()
     
 def get_readable_date(date: str) -> str:
-  # Convert the string to a datetime object
   try:
     date_obj = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
-    return date_obj.strftime("%Y %B %d %A %-I%p").lstrip('0')
+    return date_obj.strftime("%Y %B %d %A %I%p").lstrip('0').replace('AM', 'am').replace('PM', 'pm')
   except Exception as e:
     print(date, e)
 
-def format_dates(event: dict) -> None:
+def format_dates(event: dict) -> None:    
   if 'endDate' in event:
     event['endDate'] = get_readable_date(event['endDate'])
     
   if 'dates' in event:
     for date in event['dates']:
       date['startDateTime'] = get_readable_date(date['startDateTime'])
-      date['endDateTime'] = get_readable_date(event['endDateTime'])
   
   if 'startDate' in event:
-    date['startDate'] = get_readable_date(event['startDate'])
+    event['startDate'] = get_readable_date(event['startDate'])
 
-def get_festival_obj() -> list[dict]:
-  obj = get_festivals_data()
+def get_data() -> list[dict]:
+  obj = fetch_festivals_data()
   
   for i, event in enumerate(obj):
     try:
@@ -70,5 +68,4 @@ def get_festival_obj() -> list[dict]:
       break
   
   return obj
-  
-print(json.dumps(get_festival_obj()[0]))
+

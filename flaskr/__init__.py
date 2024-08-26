@@ -1,24 +1,24 @@
-import os
-from flask_caching import Cache
-from flask import Flask
+from flask import Flask, redirect
+from flask_cors import CORS
 
-from config import Config
+from flaskr import api
+from flaskr import command
 
-def create_app(test_config=None):
-  app = Flask(__name__)
-  app.config.from_object(Config)
+DEV_CONFIG = 'dev.cfg'
+
+def create_app(config_file=DEV_CONFIG):
+  app = Flask(__name__, instance_relative_config=True)
+  app.config.from_pyfile(config_file)
   
-  # Override with test config if provided
-  if test_config:
-    app.config.update(test_config)
-
-  # Initialize Flask-Caching with Redis
-  # cache = Cache(app)
-
-
-  # A simple page that says hello
-  @app.route('/hello')
-  def hello():
-    return 'Hello, World!'
-
+  app.register_blueprint(api.blueprint)
+  api.configue(app)
+  
+  CORS(app)
+  
+  @app.route('/')
+  def root():
+    if app.config['ENV'] == 'development':
+      return redirect(app.config['LOCAL_URL'])
+    return app.send_static_file('index.html')
+  
   return app
