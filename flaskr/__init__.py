@@ -1,34 +1,37 @@
 from flask import Flask, redirect
-from flask_caching import Cache
 
 import os
 from dotenv import load_dotenv
 
-from flaskr import api
 
 DEV_CONFIG = 'dev.cfg'
 load_dotenv()
 
 def create_app(config_file=DEV_CONFIG):
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_pyfile(config_file)
+    app.config.from_mapping(
+        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite')
+    )
     
-    REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+    if config_file is None:
+        app.config.from_pyfile('config.py', silent=True)
+    else:
+        app.config.from_pyfile(config_file)
+        # app.config.from_mapping(config_file)
+        
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
     
-    app.register_blueprint(api.blueprint)
-    api.configure(app)
+    from . import db
+    db.init_app(app)
     
-    # Configure Flask-Caching
-    cache = Cache(app, config={
-        'CACHE_TYPE': 'redis',
-        'CACHE_REDIS_HOST': app.config['REDIS_HOST'],
-        'CACHE_REDIS_PORT': app.config['REDIS_PORT'],
-        'CACHE_REDIS_PASSWORD': REDIS_PASSWORD
-    })
-
+    from .api import event, key
+    app.register_blueprint(event.bp)
+    app.register_blueprint(key.bp)
 
     @app.route('/')
-    @cache.cached(timeout=60)  # Cache this route for 60 seconds
     def root():
         if app.config['ENV'] == 'development':
             return redirect(app.config['LOCAL_URL'])
