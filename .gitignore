@@ -1,7 +1,13 @@
 __pycache__
 
 # Dependencies
-venv/
+env/
 
 # Environment Variables
 .env
+
+# DB file
+*.sqlite
+
+# Miscellaneous
+*.json
