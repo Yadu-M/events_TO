@@ -1,20 +1,14 @@
-import './App.css'
-import { MapC } from './Components/MapC'
-import Layout from './Layout'
+import { Map } from "./Map/Map";
+
+import "mapbox-gl/dist/mapbox-gl.css";
+import "./App.css";
 
 function App() {
   return (
     <>
-      <Layout>
-        <main>
-          <h1 style={{
-            paddingLeft: "1rem"
-          }}>Realtime mapping of Festivals across TO</h1>
-          <MapC />
-        </main>
-      </Layout>
+      <Map />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
