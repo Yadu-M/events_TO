@@ -1,9 +1,10 @@
 import mapboxgl from "mapbox-gl";
 import { useRef, useState, useEffect } from "react";
 
-import "./style.css"
+import "./style.css";
+import { image } from "../App";
 
-export const Map = () => {
+export const Map = ({ info }: { info: image[] }) => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -15,9 +16,7 @@ export const Map = () => {
   const [styleLoaded, setStyleLoaded] = useState(false);
 
   useEffect(() => {
-    const accessToken =
-      import.meta.env.VITE_MAPBOX_TOKEN ??
-      "pk.eyJ1IjoieWFkaWkiLCJhIjoiY20xOGIzZzRsMDlkdDJqcTI2bzNhaXg5biJ9.UDf1_cs8fXdorZl3x4qgWg";
+    const accessToken = import.meta.env.VITE_MAPBOX_TOKEN ?? null;
     if (accessToken == null) alert("mapbox access token not initialized");
     else mapboxgl.accessToken = accessToken;
 
