@@ -11,21 +11,26 @@ export const Map = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
-    const accessToken = import.meta.env.VITE_MAPBOX_TOKEN ?? null;
-    if (accessToken == null) alert("mapbox access token not initialized");
-    else mapboxgl.accessToken = accessToken;
+    const accessToken: string = import.meta.env.VITE_MAPBOX_TOKEN as string;
+    if (!accessToken) alert("mapbox access token not initialized");
+    mapboxgl.accessToken = accessToken;
+
+    if (!mapContainerRef.current) {
+      console.error("Map container not initialized");
+      return;
+    }
 
     mapRef.current = new mapboxgl.Map({
-      container: mapContainerRef.current as HTMLDivElement,
+      container: mapContainerRef.current,
       center: [-79.347015, 43.65107],
       zoom: 15.1,
       pitch: 62,
       bearing: -20,
     });
 
-    mapRef.current.on('load', () => {
+    mapRef.current.on("load", () => {
       setMapLoaded(true);
-    })
+    });
 
     return () => {
       mapRef.current?.remove();

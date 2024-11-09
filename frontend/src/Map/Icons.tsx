@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 
 import mapboxgl, { LngLatLike, Map } from "mapbox-gl";
-import { getInfo, Info } from "../api/info";
+import { Info } from "../api/info";
 
 interface Feature {
   type: "Feature";
   properties: {
     message: string;
     imageId: number;
-    url:  string,
+    url: string;
     iconSize: [number, number];
   };
   geometry: {
@@ -27,27 +27,33 @@ export const Icons = ({
 }: {
   mapRef: React.MutableRefObject<Map | null>;
 }) => {
-  const [infos, setInfos] = useState<Info[] | null>();
+  const [infos, setInfos] = useState<Info>();
 
   useEffect(() => {
     const getEventIcons = async () => {
-      const data = await getInfo();
-      setInfos(data);
+      await fetch("api/info")
+        .then((res) => res.json())
+        .then((payload: Info) => {
+          setInfos(payload);
+        })
+        .catch((err: unknown) => {
+          console.error(`Something went wrong: ${String(err)}`);
+        });
     };
 
-    getEventIcons();
+    void getEventIcons();
   }, []);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !infos) return; 
+    if (!map || !infos) return;
 
     const geojson: FeatureCollection = {
       type: "FeatureCollection",
       features: [],
     };
 
-    for (const info of infos) {
+    for (const info of infos.data) {
       const feature: Feature = {
         type: "Feature",
         properties: {
@@ -70,8 +76,8 @@ export const Icons = ({
       const height = marker.properties.iconSize[1];
       el.className = "marker";
       el.style.backgroundImage = `url(${marker.properties.url})`;
-      el.style.width = `${width}px`;
-      el.style.height = `${height}px`;
+      el.style.width = `${width.toString()}px`;
+      el.style.height = `${height.toString()}px`;
       el.style.backgroundSize = "100%";
       el.style.display = "block";
       el.style.border = "none";
@@ -83,13 +89,11 @@ export const Icons = ({
         window.alert(marker.properties.message);
       });
 
-      if (map) {
-        new mapboxgl.Marker(el)
-          .setLngLat(marker.geometry.coordinates as LngLatLike)
-          .addTo(map);
-      }
+      new mapboxgl.Marker(el)
+        .setLngLat(marker.geometry.coordinates as LngLatLike)
+        .addTo(map);
     }
   }, [mapRef, infos]);
 
-  return <></>
+  return <></>;
 };

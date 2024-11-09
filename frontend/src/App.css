@@ -1,10 +1,10 @@
 @font-face {
-  font-family: 'Geist';
-  src: url('assets/statics-woff/Geist-Regular.woff2') format('woff2');
+  font-family: "Geist";
+  src: url("assets/statics-woff/Geist-Regular.woff2") format("woff2");
 }
 
 * {
-  font-family: 'Geist';
+  font-family: "Geist";
 }
 
 #root {

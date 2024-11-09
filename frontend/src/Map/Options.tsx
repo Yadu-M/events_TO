@@ -15,7 +15,7 @@ export const Options = ({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return; 
+    if (!map) return;
 
     const handleStyleLoad = () => {
       setStyleLoaded(true);
@@ -103,6 +103,7 @@ export const Options = ({
     showRoadLabels,
     showTransitLabels,
     styleLoaded,
+    mapRef,
   ]);
 
   return (
@@ -116,7 +117,9 @@ export const Options = ({
                 id="lightPreset"
                 name="lightPreset"
                 value={lightPreset}
-                onChange={(e) => setLightPreset(e.target.value)}
+                onChange={(e) => {
+                  setLightPreset(e.target.value);
+                }}
               >
                 <option value="dawn">Dawn</option>
                 <option value="day">Day</option>
@@ -132,7 +135,9 @@ export const Options = ({
                 type="checkbox"
                 id="showPlaceLabels"
                 checked={showPlaceLabels}
-                onChange={(e) => setShowPlaceLabels(e.target.checked)}
+                onChange={(e) => {
+                  setShowPlaceLabels(e.target.checked);
+                }}
               />
             </label>
           </fieldset>
@@ -143,7 +148,9 @@ export const Options = ({
                 type="checkbox"
                 id="showPointOfInterestLabels"
                 checked={showPOILabels}
-                onChange={(e) => setShowPOILabels(e.target.checked)}
+                onChange={(e) => {
+                  setShowPOILabels(e.target.checked);
+                }}
               />
             </label>
           </fieldset>
@@ -154,7 +161,9 @@ export const Options = ({
                 type="checkbox"
                 id="showRoadLabels"
                 checked={showRoadLabels}
-                onChange={(e) => setShowRoadLabels(e.target.checked)}
+                onChange={(e) => {
+                  setShowRoadLabels(e.target.checked);
+                }}
               />
             </label>
           </fieldset>
@@ -165,7 +174,9 @@ export const Options = ({
                 type="checkbox"
                 id="showTransitLabels"
                 checked={showTransitLabels}
-                onChange={(e) => setShowTransitLabels(e.target.checked)}
+                onChange={(e) => {
+                  setShowTransitLabels(e.target.checked);
+                }}
               />
             </label>
           </fieldset>
