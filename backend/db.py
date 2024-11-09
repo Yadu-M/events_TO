@@ -179,8 +179,8 @@ def init_db():
   # Populating info table
   db.execute(
     f"""
-    INSERT INTO info (event_id, event_name, thumbNail_url, lat, lng)
-    SELECT event.id, event.event_name, image.thumbNail_url, coords.lat, coords.lng
+    INSERT INTO info (event_id, event_name, url, lat, lng)
+    SELECT event.id, event.event_name, image.url, coords.lat, coords.lng
     FROM event
     JOIN image on event.id = image.event_id
     JOIN location on event.id = location.event_id
