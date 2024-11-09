@@ -46,12 +46,4 @@ def format_dates(event: dict) -> None:
 
 
 def get_data() -> list[dict]:
-  obj = fetch_festivals_data()
-  
-  # for event in obj:
-  #   try:
-  #     format_dates(event["calEvent"])
-  #   except Exception as e:
-  #     print("Something went wrong trying to format dates")
-  
-  return obj
+  return fetch_festivals_data()

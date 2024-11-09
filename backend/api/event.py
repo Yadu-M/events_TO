@@ -7,7 +7,7 @@ from backend.db import get_db
 
 bp = Blueprint('event', __name__, url_prefix='/event')
 
-@bp.route('/get')
+@bp.route('/')
 def get_events():
   db = get_db()
   result = {}
