@@ -4,7 +4,7 @@ export interface Info {
   event_name: string;
   lat: number;
   lng: number;
-  thumbNail_url: string;
+  url: string;
 }
 
 export const getInfo = async () => {

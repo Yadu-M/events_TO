@@ -1,13 +1,14 @@
 import mapboxgl from "mapbox-gl";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 import "./style.css";
-import { Info } from "../api/info";
-import { StyleOptions } from "./StyleOptions";
+import { Options } from "./Options";
+import { Icons } from "./Icons";
 
-export const Map = ({ info }: { info: Info[] }) => {
+export const Map = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     const accessToken = import.meta.env.VITE_MAPBOX_TOKEN ?? null;
@@ -22,6 +23,10 @@ export const Map = ({ info }: { info: Info[] }) => {
       bearing: -20,
     });
 
+    mapRef.current.on('load', () => {
+      setMapLoaded(true);
+    })
+
     return () => {
       mapRef.current?.remove();
     };
@@ -30,7 +35,8 @@ export const Map = ({ info }: { info: Info[] }) => {
   return (
     <>
       <div id="map-container" ref={mapContainerRef} />
-      {mapRef.current && <StyleOptions mapRef={mapRef} />}
+      {mapLoaded && <Options mapRef={mapRef} />}
+      {mapLoaded && <Icons mapRef={mapRef} />}
     </>
   );
 };

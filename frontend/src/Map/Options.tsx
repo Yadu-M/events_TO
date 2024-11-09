@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Map } from "mapbox-gl";
 
-export const StyleOptions = ({
+export const Options = ({
   mapRef,
 }: {
   mapRef: React.MutableRefObject<Map | null>;
@@ -15,18 +15,16 @@ export const StyleOptions = ({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map) return; 
 
     const handleStyleLoad = () => {
       setStyleLoaded(true);
 
-      // Check if source already exists and remove it if it does
-      if (map.getSource('line')) {
-        map.removeLayer('line');
-        map.removeSource('line');
+      if (map.getSource("line")) {
+        map.removeLayer("line");
+        map.removeSource("line");
       }
 
-      // Add source and layer
       map.addSource("line", {
         type: "geojson",
         lineMetrics: true,
@@ -59,20 +57,20 @@ export const StyleOptions = ({
       });
     };
 
-    // Add event listener
-    map.on("style.load", handleStyleLoad);
+    if (map.isStyleLoaded()) {
+      handleStyleLoad();
+    } else {
+      map.on("style.load", handleStyleLoad);
+    }
 
-    // Cleanup function
     return () => {
-      if (map) {
-        map.off("style.load", handleStyleLoad);
-        if (map.getSource('line')) {
-          map.removeLayer('line');
-          map.removeSource('line');
-        }
+      map.off("style.load", handleStyleLoad);
+      if (map.getSource("line")) {
+        map.removeLayer("line");
+        map.removeSource("line");
       }
     };
-  }, []);
+  }, [mapRef]);
 
   useEffect(() => {
     if (!styleLoaded) return;
@@ -104,7 +102,7 @@ export const StyleOptions = ({
     showPOILabels,
     showRoadLabels,
     showTransitLabels,
-    styleLoaded
+    styleLoaded,
   ]);
 
   return (
