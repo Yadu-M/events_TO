@@ -1,4 +1,5 @@
 from flask import Flask, redirect
+from flask_cors import CORS
 
 import os
 from dotenv import load_dotenv
@@ -9,6 +10,7 @@ load_dotenv()
 
 def create_app(config_file=DEV_CONFIG):
     app = Flask(__name__, instance_relative_config=True)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
     app.config.from_mapping(
         DATABASE=os.path.join(app.instance_path, 'backend.sqlite')
     )
@@ -27,11 +29,12 @@ def create_app(config_file=DEV_CONFIG):
     from . import db
     db.init_app(app)
     
-    from .api import event, key, location, image
+    from .api import event, key, location, image, info
     app.register_blueprint(event.bp)
     app.register_blueprint(key.bp)
     app.register_blueprint(location.bp)
     app.register_blueprint(image.bp)
+    app.register_blueprint(info.bp)
 
     @app.route('/')
     def root():
