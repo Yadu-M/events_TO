@@ -10,6 +10,8 @@ DROP TABLE IF EXISTS location;
 
 DROP TABLE IF EXISTS coords;
 
+DROP TABLE IF EXISTS info;
+
 CREATE TABLE
   event (
     id INTEGER PRIMARY KEY,
@@ -76,3 +78,14 @@ CREATE TABLE
     lng DOUBLE PRECISION NOT NULL,
     FOREIGN KEY (location_id) REFERENCES location (id)
   );
+
+CREATE TABLE
+  info (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER NOT NULL,
+    event_name TINYTEXT NOT NULL,
+    thumbNail_url TINYTEXT NOT NULL,
+    lat DOUBLE PRECISION NOT NULL,
+    lng DOUBLE PRECISION NOT NULL,
+    FOREIGN KEY (event_id) REFERENCES event (id)
+  )
