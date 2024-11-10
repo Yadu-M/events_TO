@@ -37,7 +37,7 @@ export const Icons = ({
     const getEventIcons = async () => {
       try {
         const res = await fetch("api/info");
-        const payload: Info = await res.json();
+        const payload: Info = (await res.json()) as Info;
         setInfos(payload);
       } catch (err) {
         console.error(`Something went wrong: ${String(err)}`);
@@ -85,8 +85,8 @@ export const Icons = ({
       const [width, height] = marker.properties.iconSize;
       el.className = "marker";
       el.style.backgroundImage = `url(${marker.properties.url})`;
-      el.style.width = `${width}px`;
-      el.style.height = `${height}px`;
+      el.style.width = `${width.toString()}px`;
+      el.style.height = `${height.toString()}px`;
       el.style.backgroundSize = "100%";
       el.style.borderRadius = "50%";
       el.style.cursor = "pointer";

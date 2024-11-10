@@ -7,10 +7,12 @@ export const useHover = <T extends HTMLElement>(ref: RefObject<T>) => {
     const node = ref.current;
     if (!node) return;
 
-    console.log('here')
-
-    const handeMouseEnter = () => setIsHovered(true);
-    const handleMouseLeave = () => setIsHovered(false);
+    const handeMouseEnter = () => {
+      setIsHovered(true);
+    };
+    const handleMouseLeave = () => {
+      setIsHovered(false);
+    };
 
     return () => {
       node.removeEventListener("mouseenter", handeMouseEnter);
