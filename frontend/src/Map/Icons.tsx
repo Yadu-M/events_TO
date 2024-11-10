@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 import mapboxgl, { LngLatLike, Map } from "mapbox-gl";
 import { Info } from "../api/info";
+import { createPortal } from "react-dom";
+import { Popup } from "./Popup";
 
 interface Feature {
   type: "Feature";
@@ -28,17 +29,19 @@ export const Icons = ({
   mapRef: React.MutableRefObject<Map | null>;
 }) => {
   const [infos, setInfos] = useState<Info>();
+  const elRef = useRef<HTMLDivElement[]>([]);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const [mountedMarkers, setMountedMarkers] = useState<HTMLDivElement[]>([]);
 
   useEffect(() => {
     const getEventIcons = async () => {
-      await fetch("api/info")
-        .then((res) => res.json())
-        .then((payload: Info) => {
-          setInfos(payload);
-        })
-        .catch((err: unknown) => {
-          console.error(`Something went wrong: ${String(err)}`);
-        });
+      try {
+        const res = await fetch("api/info");
+        const payload: Info = await res.json();
+        setInfos(payload);
+      } catch (err) {
+        console.error(`Something went wrong: ${String(err)}`);
+      }
     };
 
     void getEventIcons();
@@ -70,30 +73,43 @@ export const Icons = ({
       geojson.features.push(feature);
     }
 
+    // Cleanup existing markers
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = [];
+    elRef.current = [];
+    setMountedMarkers([]);
+
+    const newElRefs: HTMLDivElement[] = [];
     for (const marker of geojson.features) {
       const el = document.createElement("div");
-      const width = marker.properties.iconSize[0];
-      const height = marker.properties.iconSize[1];
+      const [width, height] = marker.properties.iconSize;
       el.className = "marker";
       el.style.backgroundImage = `url(${marker.properties.url})`;
-      el.style.width = `${width.toString()}px`;
-      el.style.height = `${height.toString()}px`;
+      el.style.width = `${width}px`;
+      el.style.height = `${height}px`;
       el.style.backgroundSize = "100%";
-      el.style.display = "block";
-      el.style.border = "none";
       el.style.borderRadius = "50%";
       el.style.cursor = "pointer";
-      el.style.padding = "0";
 
       el.addEventListener("click", () => {
         window.alert(marker.properties.message);
       });
 
-      new mapboxgl.Marker(el)
+      const markerInstance = new mapboxgl.Marker(el)
         .setLngLat(marker.geometry.coordinates as LngLatLike)
         .addTo(map);
+
+      markersRef.current.push(markerInstance);
+      newElRefs.push(el);
     }
+
+    elRef.current = newElRefs;
+    setMountedMarkers(newElRefs);
+
+    return () => {
+      markersRef.current.forEach((marker) => marker.remove());
+    };
   }, [mapRef, infos]);
 
-  return <></>;
+  return <>{mountedMarkers.map((el) => createPortal(<Popup />, el))}</>;
 };
