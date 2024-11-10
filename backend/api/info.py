@@ -17,7 +17,8 @@ def get_info():
       """
         SELECT info.* FROM info 
         INNER JOIN event on info.event_id = event.id
-        WHERE event.end_date > CURRENT_TIMESTAMP        
+        WHERE event.end_date > CURRENT_TIMESTAMP
+        GROUP BY info.event_id
       """).fetchall()
   except Exception as e:
     print(f'Exception happened {e}')
