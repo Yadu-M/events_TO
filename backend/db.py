@@ -1,9 +1,11 @@
-import sqlite3
-import click
-from datetime import datetime
-
+import urllib.parse
 from flask import Flask
 from flask import current_app, g
+
+import sqlite3
+import click
+import urllib
+from datetime import datetime
 
 from backend.dataloader import get_data
 
@@ -29,8 +31,11 @@ def init_db():
   
   with current_app.open_resource("schema.sql") as f:
     db.executescript(f.read().decode("utf8"))
+
+  data = get_data()
+
   
-  for index, dataObj in enumerate(get_data()):
+  for index, dataObj in enumerate(data):
     info = dataObj["calEvent"]
 
     # Populating events table
@@ -81,12 +86,14 @@ def init_db():
 
       if "url" in info["image"]:
         if info["image"]["url"] != "":
-          url = "https://secure.toronto.ca" + info["image"]["url"]
+          encoded_bit = urllib.parse.quote(info["image"]["url"])
+          url = "https://secure.toronto.ca" + encoded_bit
     
       if "thumbImage" in info:
         if "url" in info["thumbImage"]:
           if info["thumbImage"]["url"] != "":
-            thumbNail_url = "https://secure.toronto.ca" + info["thumbImage"]["url"]
+            encoded_bit = urllib.parse.quote(info["image"]["url"])
+            thumbNail_url = "https://secure.toronto.ca" + encoded_bit
 
       db.execute(
         """
