@@ -1,27 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import mapboxgl, { LngLatLike, Map } from "mapbox-gl";
-import { Info } from "../api/info";
 import { createPortal } from "react-dom";
-import { Popup } from "./Popup";
 
-interface Feature {
-  type: "Feature";
-  properties: {
-    message: string;
-    imageId: number;
-    url: string;
-    iconSize: [number, number];
-  };
-  geometry: {
-    type: "Point";
-    coordinates: [number, number];
-  };
-}
+import mapboxgl, { LngLatLike, Map } from "mapbox-gl";
 
-interface FeatureCollection {
-  type: "FeatureCollection";
-  features: Feature[];
-}
+import { Feature, FeatureCollection, Info } from "./types";
+import { Popup } from "../Event/Popup";
+import "./styles.css";
 
 export const Icons = ({
   mapRef,
@@ -31,7 +15,11 @@ export const Icons = ({
   const [infos, setInfos] = useState<Info>();
   const elRef = useRef<HTMLDivElement[]>([]);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const [mountedMarkers, setMountedMarkers] = useState<HTMLDivElement[]>([]);
+  const [hoveredMarker, setHoveredMarker] = useState<{
+    hoveredElement: HTMLDivElement;
+    iconURL: string;
+    eventId: number;
+  } | null>(null);
 
   useEffect(() => {
     const getEventIcons = async () => {
@@ -73,43 +61,49 @@ export const Icons = ({
       geojson.features.push(feature);
     }
 
-    // Cleanup existing markers
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
     elRef.current = [];
-    setMountedMarkers([]);
 
-    const newElRefs: HTMLDivElement[] = [];
     for (const marker of geojson.features) {
       const el = document.createElement("div");
-      const [width, height] = marker.properties.iconSize;
+      const properties = marker.properties;
+      const [width, height] = properties.iconSize;
+
       el.className = "marker";
-      el.style.backgroundImage = `url(${marker.properties.url})`;
-      el.style.width = `${width.toString()}px`;
-      el.style.height = `${height.toString()}px`;
+      el.style.backgroundImage = `url(${properties.url})`;
+      el.style.width = `${width}px`;
+      el.style.height = `${height}px`;
       el.style.backgroundSize = "100%";
       el.style.borderRadius = "50%";
       el.style.cursor = "pointer";
 
-      el.addEventListener("click", () => {
-        window.alert(marker.properties.message);
-      });
+      el.addEventListener("mouseenter", () =>
+        setHoveredMarker({
+          eventId: properties.imageId,
+          iconURL: properties.url,
+          hoveredElement: el,
+        })
+      );
+      el.addEventListener("mouseleave", () => setHoveredMarker(null));
 
       const markerInstance = new mapboxgl.Marker(el)
         .setLngLat(marker.geometry.coordinates as LngLatLike)
         .addTo(map);
 
       markersRef.current.push(markerInstance);
-      newElRefs.push(el);
+      elRef.current.push(el);
     }
-
-    elRef.current = newElRefs;
-    setMountedMarkers(newElRefs);
 
     return () => {
       markersRef.current.forEach((marker) => marker.remove());
     };
   }, [mapRef, infos]);
 
-  return <>{mountedMarkers.map((el) => createPortal(<Popup />, el))}</>;
+  return (
+    <>
+      {hoveredMarker &&
+        createPortal(<Popup hoveredObj={hoveredMarker} />, document.body)}
+    </>
+  );
 };

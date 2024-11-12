@@ -1,9 +1,10 @@
-import mapboxgl from "mapbox-gl";
 import { useRef, useEffect, useState } from "react";
 
-import "./style.css";
+import mapboxgl from "mapbox-gl";
+
 import { Options } from "./Options";
 import { Icons } from "./Icons";
+import "./styles.css";
 
 export const Map = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
