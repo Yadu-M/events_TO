@@ -33,8 +33,7 @@ def init_db():
     db.executescript(f.read().decode("utf8"))
 
   data = get_data()
-
-  
+    
   for index, dataObj in enumerate(data):
     info = dataObj["calEvent"]
 
