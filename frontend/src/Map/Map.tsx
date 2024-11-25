@@ -1,10 +1,7 @@
 import { useRef, useEffect, useState } from "react";
-
 import mapboxgl from "mapbox-gl";
-
-import { Options } from "./Options";
+import { Options } from "../Header/Options";
 import { Icons } from "./Icons";
-import "./styles.css";
 
 export const Map = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -40,9 +37,13 @@ export const Map = () => {
 
   return (
     <>
-      <div id="map-container" ref={mapContainerRef} />
-      {mapLoaded && <Options mapRef={mapRef} />}
-      {mapLoaded && <Icons mapRef={mapRef} />}
+      <div id="map" ref={mapContainerRef} className="absolute inset-0" />
+      {mapLoaded && (
+        <>
+          <Options mapRef={mapRef} />
+          <Icons mapRef={mapRef} />
+        </>
+      )}
     </>
   );
 };

@@ -5,7 +5,6 @@ import mapboxgl, { LngLatLike, Map } from "mapbox-gl";
 
 import { Feature, FeatureCollection, Info } from "./types";
 import { Popup } from "../Event/Popup";
-import "./styles.css";
 
 export const Icons = ({
   mapRef,
@@ -78,14 +77,18 @@ export const Icons = ({
       el.style.borderRadius = "50%";
       el.style.cursor = "pointer";
 
-      el.addEventListener("mouseenter", () =>
+      el.addEventListener("mouseenter", () => {
+        el.style.opacity = "0.7";
         setHoveredMarker({
           eventId: properties.imageId,
           iconURL: properties.url,
           hoveredElement: el,
-        })
-      );
-      el.addEventListener("mouseleave", () => setHoveredMarker(null));
+        });
+      });
+      el.addEventListener("mouseleave", () => {
+        el.style.opacity = "1";
+        setHoveredMarker(null)
+      });
 
       const markerInstance = new mapboxgl.Marker(el)
         .setLngLat(marker.geometry.coordinates as LngLatLike)
