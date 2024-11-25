@@ -36,7 +36,7 @@ export const Popup = ({
   useEffect(() => {
     const getEventData = async () => {
       try {
-        const res = await fetch(`/api/event/${eventId}`);
+        const res = await fetch(`/api/event/${eventId.toString()}`);
         const payload = (await res.json()) as {
           data: Event;
           success: boolean;
@@ -50,8 +50,8 @@ export const Popup = ({
       }
     };
 
-    getEventData();
-  }, []);
+    void getEventData();
+  }, [eventId]);
 
   const popupStyle: React.CSSProperties = {
     position: "absolute",
@@ -81,14 +81,16 @@ export const Popup = ({
           <div className="flex flex-col">
             <p>{event.category ? `Catgeory: ${event.category}` : ""}</p>
             <p>{event.org_name ? `Org Name: ${event.org_name}` : ""}</p>
-            <p>{event.partner_name ? `Partner Name: ${event.partner_name}` : ""}</p>
             <p>
-              {event.accessibility ? `Accessibility: ${event.accessibility}` : ""}
+              {event.partner_name ? `Partner Name: ${event.partner_name}` : ""}
             </p>
             <p>
-              {event.other_cost_info
-                ? `Cost: ${event.other_cost_info}`
+              {event.accessibility
+                ? `Accessibility: ${event.accessibility}`
                 : ""}
+            </p>
+            <p>
+              {event.other_cost_info ? `Cost: ${event.other_cost_info}` : ""}
             </p>
           </div>
         </div>

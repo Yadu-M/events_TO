@@ -71,8 +71,8 @@ export const Icons = ({
 
       el.className = "marker";
       el.style.backgroundImage = `url(${properties.url})`;
-      el.style.width = `${width}px`;
-      el.style.height = `${height}px`;
+      el.style.width = `${width.toString()}px`;
+      el.style.height = `${height.toString()}px`;
       el.style.backgroundSize = "100%";
       el.style.borderRadius = "50%";
       el.style.cursor = "pointer";
@@ -87,7 +87,7 @@ export const Icons = ({
       });
       el.addEventListener("mouseleave", () => {
         el.style.opacity = "1";
-        setHoveredMarker(null)
+        setHoveredMarker(null);
       });
 
       const markerInstance = new mapboxgl.Marker(el)

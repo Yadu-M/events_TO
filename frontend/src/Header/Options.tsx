@@ -13,7 +13,9 @@ export const Options = ({
 }) => {
   type lightPresetT = "dawn" | "noon" | "dusk" | "night";
 
-  const [lightPreset, setLightPreset] = useState<lightPresetT>(initLightPreset());
+  const [lightPreset, setLightPreset] = useState<lightPresetT>(
+    initLightPreset()
+  );
   const [showPlaceLabels, setShowPlaceLabels] = useState(true);
   const [showPOILabels, setShowPOILabels] = useState(true);
   const [showRoadLabels, setShowRoadLabels] = useState(true);
@@ -131,7 +133,7 @@ export const Options = ({
         type="single"
         defaultValue={lightPreset}
         onValueChange={(value: lightPresetT) => {
-          if (value) setLightPreset(value);
+          setLightPreset(value);
         }}
       >
         <ToggleGroupItem value="dawn">
