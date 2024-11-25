@@ -1,23 +1,35 @@
 import { useEffect, useState } from "react";
 import { Map } from "mapbox-gl";
-import { Button } from "@/Components/ui/button";
 import { FiMoon, FiSun, FiSunrise, FiSunset } from "react-icons/fi";
 import { MdPlace } from "react-icons/md";
 import { FaBuilding, FaBus, FaRoad } from "react-icons/fa";
+import { ToggleGroup, ToggleGroupItem } from "@/Components/ui/toggle-group";
+import { Toggle } from "@/Components/ui/toggle";
 
 export const Options = ({
   mapRef,
 }: {
   mapRef: React.MutableRefObject<Map | null>;
 }) => {
-  type lightPresetType = "dawn" | "noon" | "dusk" | "night";
+  type lightPresetT = "dawn" | "noon" | "dusk" | "night";
 
-  const [lightPreset, setLightPreset] = useState<lightPresetType>("noon");
+  const [lightPreset, setLightPreset] = useState<lightPresetT>(initLightPreset());
   const [showPlaceLabels, setShowPlaceLabels] = useState(true);
   const [showPOILabels, setShowPOILabels] = useState(true);
   const [showRoadLabels, setShowRoadLabels] = useState(true);
   const [showTransitLabels, setShowTransitLabels] = useState(true);
   const [styleLoaded, setStyleLoaded] = useState(false);
+
+  function initLightPreset(): lightPresetT {
+    const currTime = new Date().getHours().valueOf();
+    let lightPreset: lightPresetT = "dawn";
+
+    if (currTime > 12 && currTime <= 16) lightPreset = "noon";
+    else if (currTime > 16 && currTime <= 21) lightPreset = "dusk";
+    else if (currTime > 21 || currTime <= 6) lightPreset = "night";
+
+    return lightPreset;
+  }
 
   useEffect(() => {
     const map = mapRef.current;
@@ -113,82 +125,69 @@ export const Options = ({
   ]);
 
   return (
-    <div className="absolute right-10 top-4 flex flex-col gap-1">
-      <div className="flex gap-1">
-        <Button
-          size={"icon"}
-          className={lightPreset === "dawn" ? "bg-gray-600" : ""}
-          onClick={() => {
-            setLightPreset("dawn");
-          }}
-        >
+    <div className="absolute right-1 top-1 flex flex-col gap-1">
+      <ToggleGroup
+        variant={"outline"}
+        type="single"
+        defaultValue={lightPreset}
+        onValueChange={(value: lightPresetT) => {
+          if (value) setLightPreset(value);
+        }}
+      >
+        <ToggleGroupItem value="dawn">
           <FiSunrise color="orange" />
-        </Button>
-        <Button
-          size={"icon"}
-          className={lightPreset === "noon" ? "bg-gray-600" : ""}
-          onClick={() => {
-            setLightPreset("noon");
-          }}
-        >
-          <FiSun color="yellow" />
-        </Button>
-        <Button
-          size={"icon"}
-          className={lightPreset === "dusk" ? "bg-gray-600" : ""}
-          onClick={() => {
-            setLightPreset("dusk");
-          }}
-        >
+        </ToggleGroupItem>
+        <ToggleGroupItem value="noon">
+          <FiSun color="orange" />
+        </ToggleGroupItem>
+        <ToggleGroupItem value="dusk">
           <FiSunset color="orange" />
-        </Button>
-        <Button
-          size={"icon"}
-          className={lightPreset === "night" ? "bg-gray-600" : ""}
-          onClick={() => {
-            setLightPreset("night");
-          }}
-        >
-          <FiMoon color="white" />
-        </Button>
-      </div>
+        </ToggleGroupItem>
+        <ToggleGroupItem value="night">
+          <FiMoon color="black" />
+        </ToggleGroupItem>
+      </ToggleGroup>
       <div className="flex gap-1">
-        <Button
-          size={"icon"}
-          className={showPlaceLabels ? "bg-gray-600" : ""}
-          onClick={() => {
-            setShowPlaceLabels((currState) => !currState);
+        <Toggle
+          variant={"outline"}
+          aria-label="Toggle Place"
+          defaultPressed={showPOILabels}
+          onPressedChange={(press) => {
+            setShowPOILabels(press);
           }}
         >
-          <FaBuilding color="white" />
-        </Button>
-        <Button
-          size={"icon"}
-          className={showPOILabels ? "bg-gray-600" : ""}
-          onClick={() => {
-            setShowPOILabels((currState) => !currState);
+          <FaBuilding color="black" />
+        </Toggle>
+        <Toggle
+          variant={"outline"}
+          aria-label="Toggle Place"
+          defaultPressed={showPlaceLabels}
+          onPressedChange={(press) => {
+            setShowPlaceLabels(press);
           }}
         >
-          <MdPlace color="white" />
-        </Button>
-        <Button
-          size={"icon"}
-          className={showRoadLabels ? "bg-gray-600" : ""}
-          onClick={() => {
-            setShowRoadLabels((currState) => !currState);
+          <MdPlace color="black" />
+        </Toggle>
+        <Toggle
+          variant={"outline"}
+          aria-label="Toggle Place"
+          defaultPressed={showRoadLabels}
+          onPressedChange={(press) => {
+            setShowRoadLabels(press);
           }}
         >
-          <FaRoad color="white" />
-        </Button>
-        <Button
-          size={"icon"}
-          className={showTransitLabels ? "bg-gray-600" : ""}
-          onClick={() => {
-            setShowTransitLabels((currState) => !currState);
+          <FaRoad color="black" />
+        </Toggle>
+        <Toggle
+          variant={"outline"}
+          aria-label="Toggle Place"
+          defaultPressed={showTransitLabels}
+          onPressedChange={(press) => {
+            setShowTransitLabels(press);
           }}
         >
-          <FaBus color="white" />
-        </Button>
+          <FaBus color="black" />
+        </Toggle>
       </div>
     </div>
   );
