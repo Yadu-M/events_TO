@@ -1,7 +1,5 @@
 import requests
-from datetime import datetime
 from html import unescape
-# import json
 
 # Toronto Open Data is stored in a CKAN instance. It"s APIs are documented here:
 # https://docs.ckan.org/en/latest/api/
@@ -24,26 +22,6 @@ def fetch_festivals_data() -> list[dict]:
       if not res.ok:
         raise Exception("Something went wrong while fetching...")      
       return res.json()
- 
-    
-def get_readable_date(date: str) -> str:
-  try:
-    date_obj = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
-    return date_obj.strftime("%Y %B %d %A %I%p").lstrip("0").replace("AM", "am").replace("PM", "pm")
-  except Exception as e:
-    print(date, e)
-
-
-def format_dates(event: dict) -> None:    
-  if "endDate" in event:
-    event["endDate"] = get_readable_date(event["endDate"])
-    
-  if "dates" in event:
-    for date in event["dates"]:
-      date["startDateTime"] = get_readable_date(date["startDateTime"])
-  
-  if "startDate" in event:
-    event["startDate"] = get_readable_date(event["startDate"])
 
 def sanitize_json(obj):
   # Recursively sanitize JSON objects
@@ -56,7 +34,7 @@ def sanitize_json(obj):
   else:  
       return obj
 
-def get_data() -> list[dict]:
+def get_data_from_city_db() -> list[dict]:
   data = fetch_festivals_data()
   return [sanitize_json(event) for event in data]  
 

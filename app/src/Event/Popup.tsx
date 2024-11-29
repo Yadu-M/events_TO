@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 
 import { Event } from "./types";
 import { useWindowDimensions } from "../Hooks/useWindowDimensions";
+import { BiAccessibility } from "react-icons/bi";
+import { Skeleton } from "@/Components/ui/skeleton";
 
 export const Popup = ({
   hoveredObj,
@@ -70,8 +72,15 @@ export const Popup = ({
       className="rounded-md border-gray-700 border-2 bg-background p-3"
     >
       {!event ? (
-        <p>Loading...</p>
-      ) : (
+        <Skeleton className="w-[30rem]">
+          <Skeleton className="h-3 w-auto"></Skeleton>
+          <div className="flex gap-4 p-2">
+            <Skeleton className="w-48 h-48"></Skeleton>
+            <Skeleton className="h-20 wi-auto"></Skeleton>
+          </div>
+            <Skeleton className="h-20 wi-auto"></Skeleton>
+        </Skeleton>
+      ) : (        
         <div className="w-[30rem]">
           <h2>{event.event_name}</h2>
           <div className="flex gap-4 p-2">
@@ -84,11 +93,7 @@ export const Popup = ({
             <p>
               {event.partner_name ? `Partner Name: ${event.partner_name}` : ""}
             </p>
-            <p>
-              {event.accessibility
-                ? `Accessibility: ${event.accessibility}`
-                : ""}
-            </p>
+            <p>{event.accessibility === "full" ? <BiAccessibility size={30} color="blue"/> : ""}</p>
             <p>
               {event.other_cost_info ? `Cost: ${event.other_cost_info}` : ""}
             </p>

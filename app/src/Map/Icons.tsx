@@ -69,12 +69,13 @@ export const Icons = ({
       const properties = marker.properties;
       const [width, height] = properties.iconSize;
 
-      el.className = "marker";
+      // el.className = `marker w-[${width.toString()}px] h-[${height.toString()}px] border-2 rounded border-white`;
       el.style.backgroundImage = `url(${properties.url})`;
       el.style.width = `${width.toString()}px`;
       el.style.height = `${height.toString()}px`;
       el.style.backgroundSize = "100%";
-      el.style.borderRadius = "50%";
+      el.style.borderRadius = "2rem";
+      el.style.border = "2px solid white"
       el.style.cursor = "pointer";
 
       el.addEventListener("mouseenter", () => {

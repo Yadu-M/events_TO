@@ -6,9 +6,5 @@ env/
 # Environment Variables
 .env
 
-# DB file
-*.sqlite
-
-# Miscellaneous
-*.json
-*.txt
+# Flask Stuff
+instance/
