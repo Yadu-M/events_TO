@@ -1,12 +1,11 @@
 import { useRef, useEffect, useState } from "react";
-import mapboxgl from "mapbox-gl";
+import mapboxgl, { LngLatLike } from "mapbox-gl";
 import { Options } from "../Header/Options";
-import { Icons } from "./Icons";
 
 export const Map = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     const accessToken: string = import.meta.env.VITE_MAPBOX_TOKEN as string;
@@ -26,7 +25,9 @@ export const Map = () => {
       bearing: -20,
     });
 
-    mapRef.current.on("load", () => {
+    const map = mapRef.current;
+
+    map.on("load", () => {
       setMapLoaded(true);
     });
 
@@ -35,13 +36,52 @@ export const Map = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    const sourceId = "toronto-event-dataset";
+
+    if (!mapLoaded || !map) return;
+
+    map.addSource(sourceId, {
+      type: "geojson",
+      data: "/api/geojson"
+    });
+
+    map.on("sourcedata", () => {
+      const features = map.querySourceFeatures(sourceId);
+      console.log(features);
+      for (const marker of features) {
+        const eventId: number = marker.properties?.["eventId"];
+        const coords =
+          marker.geometry.type === "Point" && marker.geometry.coordinates;
+
+        console.log(features);
+        if (!coords) continue;
+
+        console.log("we here ?");
+
+        const el = document.createElement("div");
+        el.className = "marker";
+        el.style.backgroundImage = `url(/api/image/${eventId}/icon)`;
+        el.style.backgroundSize = "100%";
+        el.style.display = "block";
+        el.style.border = "none";
+        el.style.borderRadius = "50%";
+        el.style.cursor = "pointer";
+        el.style.padding = "0";
+
+        new mapboxgl.Marker(el).setLngLat(coords as LngLatLike).addTo(map);
+      }
+    });
+  }, [mapLoaded]);
+
   return (
     <>
       <div id="map" ref={mapContainerRef} className="absolute inset-0" />
       {mapLoaded && (
         <>
           <Options mapRef={mapRef} />
-          <Icons mapRef={mapRef} />
+          {/* <Icons mapRef={mapRef} /> */}
         </>
       )}
     </>

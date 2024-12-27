@@ -1,15 +1,9 @@
-export interface Info {
-  data: [
-    {
-      id: number;
-      event_id: number;
-      event_name: string;
-      lat: number;
-      lng: number;
-      url: string;
-    }
-  ];
-  success: boolean;
+export interface IconI {
+  id: number;
+  eventId: number;
+  altText: string;
+  credit: string;
+  url: string;
 }
 
 export interface Feature {

@@ -22,11 +22,11 @@ CREATE TABLE
     eventPhoneExt       TINYTEXT NOT NULL,
     partnerType         TINYTEXT NOT NULL,
     partnerName         TINYTEXT NOT NULL,
-    expectedAttendance  TINYTEXT NOT NULL,
+    expectedAvg         INTEGER,
     accessibility       TINYTEXT NOT NULL,
     frequency           TINYTEXT NOT NULL,
-    startDate           TINYTEXT NOT NULL,
-    endDate             TINYTEXT NOT NULL,
+    startDate           DATETIME NOT NULL,
+    endDate             DATETIME NOT NULL,
     timeInfo            TINYTEXT NOT NULL,
     freeEvent           TINYTEXT NOT NULL,
     orgName             TINYTEXT NOT NULL,
@@ -83,10 +83,10 @@ CREATE TABLE
   location (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
     eventId             INTEGER NOT NULL,
+    lat                 INTEGER NOT NULL,
+    lng                 INTEGER NOT NULL,
     locationName        TINYTEXT NOT NULL,
-    address             TINYTEXT NOT NULL,
-    lat                 TINYTEXT NOT NULL,
-    lng                 TINYTEXT NOT NULL,
+    address             TINYTEXT NOT NULL,    
     displayAddress      TINYTEXT NOT NULL,
 
     FOREIGN KEY (eventId) REFERENCES event (id)
@@ -102,8 +102,8 @@ CREATE TABLE
     student             INTEGER,
     adult               INTEGER,
     senior              INTEGER,
-    fromT              INTEGER,
-    toT                INTEGER,
+    fromT               INTEGER,
+    toT                 INTEGER,
 
     FOREIGN KEY (eventId) REFERENCES event (id)
   );
@@ -119,6 +119,8 @@ CREATE TABLE
     altText             TINYTEXT NOT NULL,
     credit              TINYTEXT,
     url                 TINYTEXT NOT NULL,
+    file                BLOB NOT NULL,
+    thumbNail           BLOB NOT NULL,
 
     FOREIGN KEY (eventId) REFERENCES event (id)
   );

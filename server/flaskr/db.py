@@ -1,10 +1,9 @@
-from flask import Flask
 from flask import current_app, g
 
 import sqlite3
 
 from . import fetch
-from app.helpers.db import get_cost_obj, get_date_obj, get_event_obj, get_feature_obj, get_image_obj, get_location_obj, get_weekly_date_obj, query_builder, init_table
+from flaskr.helper.db import get_cost_obj, get_date_obj, get_event_obj, get_feature_obj, get_image_obj, get_location_obj, get_weekly_date_obj, init_table
 
 def get_db():
   if "db" not in g:
@@ -27,17 +26,17 @@ def init_db():
   with current_app.open_resource("schema.sql") as f:
     db.executescript(f.read().decode("utf8"))
 
-  data = fetch.get_data_from_city_db()
-  event = {}
-  feature = {}
-  date = {}
-  weeklyDate = {}
-  location = {}
-  cost = {}
-  image = {}
-  for index, dataObj in enumerate(data):   
-    data = dataObj["calEvent"]        
+  data = fetch.get_data_from_city_db()  
+  for index, data_obj in enumerate(data):   
+    data = data_obj["calEvent"]        
     event = get_event_obj(data)    
+    feature = {}
+    date = {}
+    weeklyDate = {}
+    location = {}
+    cost = {}
+    image = {}
+    
     if "features" in data:      
       feature = get_feature_obj(index, data["features"])
     if "dates" in data:

@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 
 import mapboxgl, { LngLatLike, Map } from "mapbox-gl";
 
-import { Feature, FeatureCollection, Info } from "./types";
+import { Feature, FeatureCollection, IconI } from "./types";
 import { Popup } from "../Event/Popup";
 
 export const Icons = ({
@@ -11,7 +11,7 @@ export const Icons = ({
 }: {
   mapRef: React.MutableRefObject<Map | null>;
 }) => {
-  const [infos, setInfos] = useState<Info>();
+  const [iconData, setIconData] = useState<IconI[]>();
   const elRef = useRef<HTMLDivElement[]>([]);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [hoveredMarker, setHoveredMarker] = useState<{
@@ -23,9 +23,9 @@ export const Icons = ({
   useEffect(() => {
     const getEventIcons = async () => {
       try {
-        const res = await fetch("api/info");
-        const payload: Info = (await res.json()) as Info;
-        setInfos(payload);
+        const res = await fetch("api/icons/metadata");
+        const payload = (await res.json()) as IconI[];
+        setIconData(payload);
       } catch (err) {
         console.error(`Something went wrong: ${String(err)}`);
       }
@@ -36,14 +36,14 @@ export const Icons = ({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !infos) return;
+    if (!map || !iconData) return;
 
     const geojson: FeatureCollection = {
       type: "FeatureCollection",
       features: [],
     };
 
-    for (const info of infos.data) {
+    for (const info of iconData) {
       const feature: Feature = {
         type: "Feature",
         properties: {
@@ -102,7 +102,7 @@ export const Icons = ({
     return () => {
       markersRef.current.forEach((marker) => marker.remove());
     };
-  }, [mapRef, infos]);
+  }, [mapRef, iconData]);
 
   return (
     <>
