@@ -1,10 +1,6 @@
 from flaskr.blueprint import location
 
-from json import dumps
-from io import BytesIO
-
 from geojson import FeatureCollection, Feature
-
 
 def get_geojson_obj(byte_format=False):
   data = location.get_relevant_location_data()
@@ -29,4 +25,3 @@ def get_geojson_obj(byte_format=False):
     features.append(feature)
 
   return FeatureCollection(features)
-  

@@ -1,36 +1,43 @@
 import { useRef, useEffect, useState } from "react";
 import mapboxgl, { LngLatLike } from "mapbox-gl";
 import { Options } from "../Header/Options";
-import { Icons } from "./Icons";
+import { Popup } from "./Popup";
+import { hoverT } from "./types";
 
 export const Map = () => {
-  const sourceId = "toronto-event-dataset";
-  const layerId = "icon-layer";
-
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const markersInitializedRef = useRef(false);
 
-  const fetchImageURL = async (eventId: number) => {
-    const resp = await fetch(`/api/image/${eventId}/icon`);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [hoveredMarker, setHoveredMarker] = useState<hoverT | null>(null);
+
+  const fetchGeoJsonData = async () => {
+    const resp = await fetch(`/api/geojson`);
     if (!resp.ok) return null;
 
-    const blob = await resp.blob();
-    return URL.createObjectURL(blob);
+    return (await resp.json()) as GeoJSON.FeatureCollection;
   };
 
-  const displayMarkers = async (features: Array<GeoJSONFeature>) => {
+  const fetchIconURL = async (eventId: number) => {
+    try {
+      const resp = await fetch(`/api/image/${eventId}/icon`);
+      if (!resp.ok) throw Error();
+
+      const blob = await resp.blob();
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const displayMarkers = async (features: GeoJSON.FeatureCollection) => {
     //Remove any existing markers before creating new ones
     const existingMarkers = document.querySelectorAll(".marker");
     existingMarkers.forEach((marker) => marker.remove());
 
-    console.log(features);
-
-    for (const marker of features) {
-      console.log("lol");
+    for (const marker of features.features) {
       const eventId = marker.properties?.["eventId"];
-      const imageURL = await fetchImageURL(eventId);
+      const imageURL = await fetchIconURL(eventId);
       if (!imageURL) continue;
 
       const coords =
@@ -41,9 +48,11 @@ export const Map = () => {
 
       el.className = "marker";
       el.style.backgroundImage = `url(${imageURL})`;
+      el.style.width = "70px";
+      el.style.height = "70px";
       el.style.backgroundSize = "100%";
       el.style.display = "block";
-      el.style.border = "1rem solid white";
+      el.style.border = "0.1rem solid white";
       el.style.borderRadius = "50%";
       el.style.cursor = "pointer";
       el.style.padding = "0";
@@ -52,7 +61,18 @@ export const Map = () => {
         window.alert(JSON.stringify(marker.properties, null, 2));
       });
 
-      console.log(coords, mapRef.current);
+      el.addEventListener("mouseenter", () => {
+        el.style.opacity = "0.7";
+        setHoveredMarker({
+          eventId: eventId,
+          hoveredMarker: el,
+        });
+      });
+
+      el.addEventListener("mouseleave", () => {
+        el.style.opacity = "1";
+        setHoveredMarker(null);
+      });
 
       if (coords && mapRef.current) {
         new mapboxgl.Marker(el).setLngLat(coords).addTo(mapRef.current);
@@ -78,22 +98,13 @@ export const Map = () => {
       bearing: -20,
     });
 
-    const map = mapRef.current;
+    mapRef.current.on("load", async () => {
+      setMapLoaded(true);
 
-    mapRef.current.on("load", () => {
-      // setMapLoaded(true);
-      map.addSource(sourceId, {
-        type: "geojson",
-        data: "/api/geojson",
-      });
-
-      map.addLayer({
-        id: layerId,
-        source: sourceId,
-        type: "symbol",
-      });
-
-      void displayMarkers(map.querySourceFeatures(sourceId));
+      const features = await fetchGeoJsonData();
+      if (features) {
+        await displayMarkers(features);
+      }
     });
 
     return () => {
@@ -104,12 +115,8 @@ export const Map = () => {
   return (
     <>
       <div id="map" ref={mapContainerRef} className="absolute inset-0" />
-      {/* {mapLoaded && (
-        <>
-          <Options mapRef={mapRef} />
-          <Icons mapRef={mapRef} sourceId={sourceId} layerId={layerId} />
-        </>
-      )} */}
+      {mapLoaded && <Options mapRef={mapRef} />}
+      {hoveredMarker && <Popup props={hoveredMarker} />}
     </>
   );
 };

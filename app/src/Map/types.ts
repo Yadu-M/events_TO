@@ -1,26 +1,35 @@
-export interface IconI {
-  id: number;
+export type hoverT = {
+  hoveredMarker: HTMLDivElement;
   eventId: number;
-  altText: string;
-  credit: string;
-  url: string;
-}
+};
 
-export interface Feature {
-  type: "Feature";
-  properties: {
-    message: string;
-    imageId: number;
-    url: string;
-    iconSize: [number, number];
-  };
-  geometry: {
-    type: "Point";
-    coordinates: [number, number];
-  };
-}
-
-export interface FeatureCollection {
-  type: "FeatureCollection";
-  features: Feature[];
+export interface EventI {
+  id: number;
+  eventName: string;
+  eventWebsite: string;
+  eventEmail: string;
+  eventPhone: string;
+  eventPhoneExt: string;
+  partnerType: string;
+  partnerName: string;
+  expectedAvg?: number;
+  accessibility: string;
+  frequency: string;
+  startDate: string;
+  endDate: string;
+  timeInfo: string;
+  freeEvent: string;
+  orgName: string;
+  contactName: string;
+  contactTitle: string;
+  orgAddress: string;
+  orgPhone: string;
+  orgPhoneExt: string;
+  orgFax: string;
+  orgEmail: string;
+  orgType: string;
+  orgTypeOther: string;
+  categoryString: string;
+  description: string;
+  allDay: string;
 }

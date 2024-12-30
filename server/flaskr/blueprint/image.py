@@ -54,6 +54,3 @@ def get_thumbnail(id: int):
 
   image_data = result
   return Response(image_data, mimetype="image/png")
-
-
-  

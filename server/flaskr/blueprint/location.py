@@ -32,7 +32,7 @@ def get_all_location_data():
   results = {}
 
   try:
-    results = db.execute("SELECT * FROM location AS l;").fetchall()
+    results = db.execute("SELECT * FROM location").fetchall()
   except Exception as e:
     abort(500, description=f"Something went wrong while trying to fetch location data: {e}")
 
@@ -40,6 +40,3 @@ def get_all_location_data():
     abort(404, description="Couldn't find any locations")
   
   return results
-
-
-

@@ -1,54 +1,65 @@
 import { useEffect, useState } from "react";
 
-import { Event } from "./types";
+import { EventI, hoverT } from "./types";
 import { useWindowDimensions } from "../Hooks/useWindowDimensions";
 import { BiAccessibility } from "react-icons/bi";
 import { Skeleton } from "@/Components/ui/skeleton";
 
-export const Popup = ({
-  hoveredObj,
-}: {
-  hoveredObj: {
-    hoveredElement: HTMLDivElement;
-    iconURL: string;
-    eventId: number;
-  };
-}) => {
+export const Popup = ({ props }: { props: hoverT }) => {
   const wordLimit = 25;
-  const [event, setEvent] = useState<Event | null>(null);
+  const { eventId, hoveredMarker } = props;
+
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [event, setEvent] = useState<EventI | null>(null);
   const [elemCoordObj, setElemCoordObj] = useState(
-    hoveredObj.hoveredElement.getBoundingClientRect()
+    hoveredMarker.getBoundingClientRect()
   );
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
-  const { eventId, iconURL } = hoveredObj;
-
-  function limitDescription(description: string): string {
+  const limitDescription = (description: string) => {
     const words = description.split(" ");
     if (words.length > wordLimit) {
       return words.slice(0, wordLimit).join(" ") + " ...";
     }
     return description;
-  }
+  };
+
+  const fetchImageURL = async (eventId: number) => {
+    try {
+      const resp = await fetch(`/api/image/${eventId}/image`);
+      if (!resp.ok) throw Error();
+
+      const blob = await resp.blob();
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      return null;
+    }
+  };
 
   useEffect(() => {
-    setElemCoordObj(hoveredObj.hoveredElement.getBoundingClientRect());
-  }, [hoveredObj]);
+    const setImage = async () => {
+      const imageUrl = await fetchImageURL(eventId);
+      imageUrl && setImageUrl(imageUrl);
+    };
+
+    setImage();
+  }, []);
+
+  useEffect(() => {
+    setElemCoordObj(hoveredMarker.getBoundingClientRect());
+  }, [hoveredMarker]);
 
   useEffect(() => {
     const getEventData = async () => {
       try {
         const res = await fetch(`/api/event/${eventId.toString()}`);
-        const payload = (await res.json()) as {
-          data: Event;
-          success: boolean;
-        };
+        const payload = (await res.json()) as EventI;
 
         if (res.ok) {
-          setEvent(payload.data);
+          setEvent(payload);
         }
       } catch (err) {
-        console.error(`Something went wrong: ${String(err)}`);
+        // console.error(`Something went wrong: ${String(err)}`);
       }
     };
 
@@ -71,32 +82,40 @@ export const Popup = ({
       style={popupStyle}
       className="rounded-md border-gray-700 border-2 bg-background p-3"
     >
-      {!event ? (
+      {!event || !imageUrl ? (
         <Skeleton className="w-[30rem]">
           <Skeleton className="h-3 w-auto"></Skeleton>
           <div className="flex gap-4 p-2">
             <Skeleton className="w-48 h-48"></Skeleton>
             <Skeleton className="h-20 wi-auto"></Skeleton>
           </div>
-            <Skeleton className="h-20 wi-auto"></Skeleton>
+          <Skeleton className="h-20 wi-auto"></Skeleton>
         </Skeleton>
-      ) : (        
+      ) : (
         <div className="w-[30rem]">
-          <h2>{event.event_name}</h2>
+          <h2>{event.eventName}</h2>
           <div className="flex gap-4 p-2">
-            <img className="w-48 h-48 object-cover rounded-md" src={iconURL} />
+            <img className="w-48 h-48 object-cover rounded-md" src={imageUrl} />
             <p>{limitDescription(event.description)}</p>
           </div>
           <div className="flex flex-col">
-            <p>{event.category ? `Catgeory: ${event.category}` : ""}</p>
-            <p>{event.org_name ? `Org Name: ${event.org_name}` : ""}</p>
             <p>
-              {event.partner_name ? `Partner Name: ${event.partner_name}` : ""}
+              {event.categoryString ? `Catgeory: ${event.categoryString}` : ""}
             </p>
-            <p>{event.accessibility === "full" ? <BiAccessibility size={30} color="blue"/> : ""}</p>
+            <p>{event.orgName ? `Org Name: ${event.orgName}` : ""}</p>
             <p>
-              {event.other_cost_info ? `Cost: ${event.other_cost_info}` : ""}
+              {event.partnerName ? `Partner Name: ${event.partnerName}` : ""}
             </p>
+            <p>
+              {event.accessibility === "full" ? (
+                <BiAccessibility size={30} color="blue" />
+              ) : (
+                ""
+              )}
+            </p>
+            {/* <p>
+              {event. ? `Cost: ${event.other_cost_info}` : ""}
+            </p> */}
           </div>
         </div>
       )}
