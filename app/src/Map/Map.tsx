@@ -1,21 +1,25 @@
 import { useRef, useEffect, useState } from "react";
 import mapboxgl, { LngLatLike } from "mapbox-gl";
 import { Options } from "../Header/Options";
+import { createRoot, Root } from "react-dom/client";
 import { Popup } from "./Popup";
-import { hoverT } from "./types";
 
 export const Map = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const popUpRef = useRef<Root[] | null>(null);
+  const imageBlobURLs = useRef<string[] | null>(null);
 
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [hoveredMarker, setHoveredMarker] = useState<hoverT | null>(null);
 
   const fetchGeoJsonData = async () => {
-    const resp = await fetch(`/api/geojson`);
-    if (!resp.ok) return null;
-
-    return (await resp.json()) as GeoJSON.FeatureCollection;
+    try {
+      const resp = await fetch(`/api/geojson`);
+      if (!resp.ok) return null;
+      return (await resp.json()) as GeoJSON.FeatureCollection;
+    } catch (error) {
+      return null;
+    }
   };
 
   const fetchIconURL = async (eventId: number) => {
@@ -24,7 +28,9 @@ export const Map = () => {
       if (!resp.ok) throw Error();
 
       const blob = await resp.blob();
-      return URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
+      imageBlobURLs.current?.push(url);
+      return url;
     } catch (error) {
       return null;
     }
@@ -34,15 +40,17 @@ export const Map = () => {
     //Remove any existing markers before creating new ones
     const existingMarkers = document.querySelectorAll(".marker");
     existingMarkers.forEach((marker) => marker.remove());
+    const map = mapRef.current;
 
-    for (const marker of features.features) {
-      const eventId = marker.properties?.["eventId"];
+    for (const feature of features.features) {
+      const eventId = feature.properties?.["eventId"];
       const imageURL = await fetchIconURL(eventId);
-      if (!imageURL) continue;
 
       const coords =
-        marker.geometry.type === "Point" &&
-        (marker.geometry.coordinates as LngLatLike);
+        feature.geometry.type === "Point" &&
+        (feature.geometry.coordinates as LngLatLike);
+
+      if (!imageURL || !coords || !map) continue;
 
       const el = document.createElement("div");
 
@@ -57,26 +65,19 @@ export const Map = () => {
       el.style.cursor = "pointer";
       el.style.padding = "0";
 
-      el.addEventListener("click", () => {
-        window.alert(JSON.stringify(marker.properties, null, 2));
-      });
+      // Marker obj
+      const marker = new mapboxgl.Marker(el);
+      marker.setLngLat(coords).addTo(map);
 
-      el.addEventListener("mouseenter", () => {
-        el.style.opacity = "0.7";
-        setHoveredMarker({
-          eventId: eventId,
-          hoveredMarker: el,
-        });
-      });
+      // Instantiate a popup container to draw the popup
+      const popupContainer = document.createElement("div");
+      const root = createRoot(popupContainer);
+      root.render(<Popup eventId={eventId} key={eventId} />); // render popup
 
-      el.addEventListener("mouseleave", () => {
-        el.style.opacity = "1";
-        setHoveredMarker(null);
-      });
-
-      if (coords && mapRef.current) {
-        new mapboxgl.Marker(el).setLngLat(coords).addTo(mapRef.current);
-      }
+      popUpRef.current?.push(root); // store the popups to unmount them during cleanup
+      marker.setPopup(
+        new mapboxgl.Popup().setDOMContent(popupContainer).setMaxWidth("50 px")
+      );
     }
   };
 
@@ -108,6 +109,8 @@ export const Map = () => {
     });
 
     return () => {
+      popUpRef.current?.forEach((popup) => popup.unmount());
+      imageBlobURLs.current?.forEach((url) => URL.revokeObjectURL(url));
       mapRef.current?.remove();
     };
   }, []);
@@ -116,7 +119,6 @@ export const Map = () => {
     <>
       <div id="map" ref={mapContainerRef} className="absolute inset-0" />
       {mapLoaded && <Options mapRef={mapRef} />}
-      {hoveredMarker && <Popup props={hoveredMarker} />}
     </>
   );
 };

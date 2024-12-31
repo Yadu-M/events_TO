@@ -1,8 +1,3 @@
-export type hoverT = {
-  hoveredMarker: HTMLDivElement;
-  eventId: number;
-};
-
 export interface EventI {
   id: number;
   eventName: string;

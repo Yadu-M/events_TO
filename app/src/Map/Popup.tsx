@@ -1,20 +1,14 @@
-import { useEffect, useState } from "react";
-
-import { EventI, hoverT } from "./types";
-import { useWindowDimensions } from "../Hooks/useWindowDimensions";
-import { BiAccessibility } from "react-icons/bi";
 import { Skeleton } from "@/Components/ui/skeleton";
+import { useState, useEffect } from "react";
+import { FaAccessibleIcon } from "react-icons/fa";
+import { FaPerson } from "react-icons/fa6";
+import { EventI } from "./types";
 
-export const Popup = ({ props }: { props: hoverT }) => {
-  const wordLimit = 25;
-  const { eventId, hoveredMarker } = props;
+export const Popup = ({ eventId }: { eventId: number }) => {
+  const wordLimit = 40;
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [event, setEvent] = useState<EventI | null>(null);
-  const [elemCoordObj, setElemCoordObj] = useState(
-    hoveredMarker.getBoundingClientRect()
-  );
-  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
   const limitDescription = (description: string) => {
     const words = description.split(" ");
@@ -36,10 +30,6 @@ export const Popup = ({ props }: { props: hoverT }) => {
     }
   };
 
-  // useEffect(() => {
-  //   setElemCoordObj(hoveredMarker.getBoundingClientRect());
-  // }, [hoveredMarker]);
-
   useEffect(() => {
     const getEventData = async () => {
       try {
@@ -59,29 +49,14 @@ export const Popup = ({ props }: { props: hoverT }) => {
       imageUrl && setImageUrl(imageUrl);
     };
 
-    void setImage()
+    void setImage();
     void getEventData();
-    setElemCoordObj(hoveredMarker.getBoundingClientRect());
-  }, [hoveredMarker]);
-
-  const popupStyle: React.CSSProperties = {
-    position: "absolute",
-    top: Math.min(
-      elemCoordObj.y + elemCoordObj.height + 10,
-      windowHeight - 200
-    ),
-    left: Math.min(elemCoordObj.x + elemCoordObj.width + 10, windowWidth - 300),
-    zIndex: 10,
-    pointerEvents: "none",
-  };
+  }, [eventId]);
 
   return (
-    <div
-      style={popupStyle}
-      className="rounded-md border-gray-700 border-2 bg-background p-3"
-    >
+    <div className="rounded-md border-gray-700 border-2 bg-background p-3 max-w-[40rem]">
       {!event || !imageUrl ? (
-        <Skeleton className="max-w-96">
+        <Skeleton className="">
           <Skeleton className="h-3 w-auto"></Skeleton>
           <div className="flex gap-4 p-2">
             <Skeleton className="w-48 h-48"></Skeleton>
@@ -90,31 +65,38 @@ export const Popup = ({ props }: { props: hoverT }) => {
           <Skeleton className="h-20 wi-auto"></Skeleton>
         </Skeleton>
       ) : (
-        <div className="max-w-96">
+        <div className="">
           <h2>{event.eventName}</h2>
-          <div className="flex gap-4 p-2">
+          <div className="flex gap-4 pt-2 pr-2 pb-2">
             <img className="w-48 h-48 object-cover rounded-md" src={imageUrl} />
             <p>{limitDescription(event.description)}</p>
           </div>
-          <div className="flex flex-col">
-            <p>
-              {event.categoryString ? `Catgeory: ${event.categoryString}` : ""}
-            </p>
-            <p>{event.orgName ? `Org Name: ${event.orgName}` : ""}</p>
-            <p>
-              {event.partnerName ? `Partner Name: ${event.partnerName}` : ""}
-            </p>
-            <p>
-              {event.accessibility === "full" ? (
-                <BiAccessibility size={30} color="blue" />
-              ) : (
-                ""
-              )}
-            </p>
-            {/* <p>
-              {event. ? `Cost: ${event.other_cost_info}` : ""}
-            </p> */}
+          <div className="flex">
+            <div className="flex flex-col pr-2 mr-2 border-r-2">
+              {event.categoryString ? (<div className=""><strong>Catgeory: </strong>{`${event.categoryString}`}</div>) : ""}
+              <strong>{event.eventPhone ? `Event Phone: ${event.eventPhone}` : ""}</strong>
+              <strong>{event.expectedAvg ? 
+                (<div className="flex flex-row gap-1 items-center">{`Expected Average attendance: ${event.expectedAvg}`}<FaPerson /></div>)
+              : ""}</strong>
+              <strong>{event.frequency ? `Frequency: ${event.frequency}` : ""}</strong>
+              <strong>{event.startDate ? `Start Date: ${new Date(event.startDate).toDateString()}` : ""}</strong>
+              <strong>{event.endDate ? `End Date: ${new Date(event.endDate).toDateString()}` : ""}</strong>
+              <strong>{event.timeInfo ? `Time Info: ${event.timeInfo}` : ""}</strong>
+              <strong>{event.freeEvent ? `Free Event: ${event.freeEvent}` : ""}</strong>
+              <strong>{event.contactName ? `Contact: ${event.contactName}` : ""}</strong>         
+            </div>
+            <div className="flex flex-col pl-2 ml-2 border-l-2">
+              <strong>{event.orgName ? `Org Name: ${event.orgName}` : ""}</strong>
+              <strong>{event.partnerName ? `Partner Name: ${event.partnerName}` : ""}</strong>
+            </div>
           </div>
+          <strong>
+            {event.accessibility === "full" ? (
+              <FaAccessibleIcon size={30} color="blue" />
+            ) : (
+              ""
+            )}
+          </strong>          
         </div>
       )}
     </div>
