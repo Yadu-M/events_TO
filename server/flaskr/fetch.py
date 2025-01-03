@@ -1,4 +1,6 @@
 import requests
+import os
+from json import dumps
 from html import unescape
 
 # Toronto Open Data is stored in a CKAN instance. It"s APIs are documented here:
@@ -35,10 +37,5 @@ def sanitize_json(obj):
       return obj
 
 def get_data_from_city_db() -> list[dict]:
-  data = fetch_festivals_data()
+  data = fetch_festivals_data()  
   return [sanitize_json(event) for event in data]  
-
-  
-        
-
-

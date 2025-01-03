@@ -6,7 +6,7 @@ from flaskr.utils import dict_factory
 bp = Blueprint("location", __name__, url_prefix="/location")
 
 @bp.route("/")
-def get_relevant_location_data():
+def get_location_data():
   db = get_db()
   db.row_factory = dict_factory
   results = {}
@@ -14,7 +14,7 @@ def get_relevant_location_data():
   try:
     results = db.execute("""
       SELECT l.id, l.eventId, l.lat, l.lng, l.address, l.displayAddress, l.locationName FROM location AS l
-      INNER JOIN event ON event.id = l.eventId
+      JOIN event ON event.id = l.eventId
       WHERE event.endDate > CURRENT_TIMESTAMP;
     """).fetchall()
   except Exception as e:
@@ -25,18 +25,18 @@ def get_relevant_location_data():
   
   return results
 
-@bp.route("/all")
-def get_all_location_data():
+@bp.route("/<int:id>")
+def get_specific_location_data(id):
   db = get_db()
   db.row_factory = dict_factory
   results = {}
 
   try:
-    results = db.execute("SELECT * FROM location").fetchall()
+    results = db.execute("SELECT * FROM location WHERE eventId = ?", (id, )).fetchall()
   except Exception as e:
     abort(500, description=f"Something went wrong while trying to fetch location data: {e}")
 
   if not results:
-    abort(404, description="Couldn't find any locations")
+    abort(404, description="Couldn't find the specific location")
   
   return results

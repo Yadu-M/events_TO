@@ -3,51 +3,51 @@ def query_builder(keys: list[str], table: str):
   commas = ",".join(['?' for _ in range(len(keys))])
   return f"INSERT INTO {table} ({seperated_keys}) VALUES ({commas})"  
 
-def init_table(db, obj: dict, table: str):
+def update_table(db, obj: dict, table: str):
   if not len(obj):
     return
   query = query_builder(obj.keys(), table)
   return db.execute(query, tuple(obj.values()))
     
 def get_event_obj(data: dict):
-  return {
-    "eventName": data.get("eventName", ""),
-    "eventWebsite": data.get("eventWebsite", ""),
-    "eventEmail": data.get("eventEmail", ""),
-    "eventPhone": data.get("eventPhone", ""),
-    "eventPhoneExt": data.get("eventPhoneExt", ""),
-    "partnerType": data.get("partnerType", ""),
-    "partnerName": data.get("partnerName", ""),
-    "expectedAvg": data.get("expectedAvg", None),
-    "accessibility": data.get("accessibility", ""),
-    "frequency": data.get("frequency", ""),
-    "startDate": data.get("startDate", ""),
-    "endDate": data.get("endDate", ""),
-    "timeInfo": data.get("timeInfo", ""),
-    "freeEvent": data.get("freeEvent", ""),
-    "orgName": data.get("orgName", ""),
-    "contactName": data.get("contactName", ""),
-    "contactTitle": data.get("contactTitle", ""),
-    "orgAddress": data.get("orgAddress", ""),
-    "orgPhone": data.get("orgPhone", ""),
-    "orgPhoneExt": data.get("orgPhoneExt", ""),
-    "orgFax": data.get("orgFax", ""),
-    "orgEmail": data.get("orgEmail", ""),
-    "orgType": data.get("orgType", ""),
-    "orgTypeOther": data.get("orgTypeOther", ""),
-    "categoryString": data.get("categoryString", ""),
-    "description": data.get("description", ""),
-    "allDay": data.get("allDay", "")
-  }
-
-def get_feature_obj(index: int, data: dict):  
   features = ""
-  for featureObj in data:
-    if data[featureObj]:
-      features += featureObj + ","            
-  return {        
-    "eventId": index,
-    "features": features[:-1]
+  if "features" in data:    
+    for featureObj in data["features"]:
+      if data["features"][featureObj]:
+        features += featureObj + ","
+
+    features = features[:-1]
+            
+  return {
+    "eventName": data.get("eventName", None),
+    "eventWebsite": data.get("eventWebsite", None),
+    "eventEmail": data.get("eventEmail", None),
+    "eventPhone": data.get("eventPhone", None),
+    "eventPhoneExt": data.get("eventPhoneExt", None),
+    "partnerType": data.get("partnerType", None),
+    "partnerName": data.get("partnerName", None),
+    "expectedAvg": data.get("expectedAvg", None),
+    "accessibility": data.get("accessibility", None),
+    "frequency": data.get("frequency", None),
+    "startDate": data.get("startDate", None),
+    "endDate": data.get("endDate", None),
+    "timeInfo": data.get("timeInfo", None),
+    "freeEvent": data.get("freeEvent", None),
+    "orgName": data.get("orgName", None),
+    "contactName": data.get("contactName", None),
+    "contactTitle": data.get("contactTitle", None),
+    "orgAddress": data.get("orgAddress", None),
+    "orgPhone": data.get("orgPhone", None),
+    "orgPhoneExt": data.get("orgPhoneExt", None),
+    "orgFax": data.get("orgFax", None),
+    "orgEmail": data.get("orgEmail", None),
+    "orgType": data.get("orgType", None),
+    "orgTypeOther": data.get("orgTypeOther", None),
+    "categoryString": data.get("categoryString", None),
+    "description": data.get("description", None),
+    "allDay": data.get("allDay", None),
+    "reservationsRequired": data.get("reservationsRequired", ""),
+    "features": features
   }
 
 def get_date_obj(index: int, data: dict):
@@ -102,15 +102,14 @@ def get_location_obj(index: int, data: dict):
     geo_coded = "geoCoded" in location_obj and location_obj["geoCoded"]
     coords = "coords" in location_obj and type(location_obj["coords"]) != list
     if geo_coded and coords:
-      locationName = location_obj.get("locationName", "")
+      locationName = location_obj.get("locationName", None)
       address = location_obj.get("address", "")
       lat = location_obj["coords"]["lat"]
       lng = location_obj["coords"]["lng"]
-      displayAddress = location_obj.get("displayAddress", "")
+      displayAddress = location_obj.get("displayAddress", None)
     else:
-      print(index)
       return {}
-              
+
   return {
     "eventId": index,
     "locationName": locationName,
@@ -121,13 +120,14 @@ def get_location_obj(index: int, data: dict):
   }
 
 def get_cost_obj(index: int, data: dict):  
-  child = data.get("child", "")
-  youth = data.get("youth", "")
-  student = data.get("student", "")
-  adult = data.get("adult", "")
-  senior = data.get("senior", "")
-  _from = data.get("from", "")
-  to = data.get("to", "")
+  child = data.get("child", None)
+  youth = data.get("youth", None)
+  student = data.get("student", None)
+  adult = data.get("adult", None)
+  senior = data.get("senior", None)
+  _from = data.get("from", None)
+  _to = data.get("to", None)
+  ga = data.get("ga", None)
 
   return {
     "eventId" : index,
@@ -136,17 +136,18 @@ def get_cost_obj(index: int, data: dict):
     "student" : student,
     "adult": adult,
     "senior": senior,
-    "fromT": _from,
-    "toT": to
+    "_from": _from,
+    "_to": _to,
+    "generalAdmission": ga    
   }
 
 def get_image_obj(index: int, data: dict):
-  fileName = data.get("fileName", "")
-  fileSize = data.get("fileSize", "")
-  fileType = data.get("fileType", "")
-  altText = data.get("altText", "")
-  credit = data.get("credit", "")
-  url = data.get("url", "")
+  fileName = data.get("fileName", None)
+  fileSize = data.get("fileSize", None)
+  fileType = data.get("fileType", None)
+  altText = data.get("altText", None)
+  credit = data.get("credit", None)
+  url = data.get("url", None)
   
   if url == "":
     return {}
@@ -167,4 +168,18 @@ def get_image_obj(index: int, data: dict):
     "file": file,
     "thumbNail": thumbNail
   }  
+
+def get_reservation_obj(index: int, data: dict):
+  website = data.get("website", None)
+  phone = data.get("phone", None)
+  phoneExt = data.get("phoneExt", None)
+  email = data.get("email", None)
+
+  return {
+    "eventId": index,
+    "website": website,
+    "phone": phone,
+    "phoneExt": phoneExt,
+    "email": email
+  }
   

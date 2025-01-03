@@ -1,30 +1,25 @@
-export interface EventI {
-  id: number;
+export type markerPropertiesT = {
+  address: string;  
+  accessibility: boolean;
+  category: string;
+  cost?: {
+    _from: number | null;
+    _to: number | null;
+    adult: number | null;
+    child: number | null;
+    generalAdmission: number | null;
+    senior: number | null;
+    student: number | null;
+    youth: number | null;
+  };
+  description: string;
+  endDate: string;
+  eventId: number;
   eventName: string;
   eventWebsite: string;
-  eventEmail: string;
-  eventPhone: string;
-  eventPhoneExt: string;
-  partnerType: string;
-  partnerName: string;
-  expectedAvg?: number;
-  accessibility: string;
-  frequency: string;
-  startDate: string;
-  endDate: string;
-  timeInfo: string;
+  features: string;
   freeEvent: string;
-  orgName: string;
-  contactName: string;
-  contactTitle: string;
-  orgAddress: string;
-  orgPhone: string;
-  orgPhoneExt: string;
-  orgFax: string;
-  orgEmail: string;
-  orgType: string;
-  orgTypeOther: string;
-  categoryString: string;
-  description: string;
-  allDay: string;
-}
+  locationName: string;
+  startDate: string;
+  reservationsRequired: string;
+};

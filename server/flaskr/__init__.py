@@ -4,11 +4,12 @@ from flask_cors import CORS
 import os
 
 def import_blueprints(app: Flask):
-    from flaskr.blueprint import location, geojson, image, event
+    from flaskr.blueprint import location, geojson, image, event, cost
     app.register_blueprint(image.bp)
     app.register_blueprint(location.bp)
     app.register_blueprint(geojson.bp)
     app.register_blueprint(event.bp)
+    app.register_blueprint(cost.bp)
 
 def import_commands(app: Flask):
   from . import commands

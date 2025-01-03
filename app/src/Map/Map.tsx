@@ -3,6 +3,7 @@ import mapboxgl, { LngLatLike } from "mapbox-gl";
 import { Options } from "../Header/Options";
 import { createRoot, Root } from "react-dom/client";
 import { Popup } from "./Popup";
+import { markerPropertiesT } from "./types";
 
 export const Map = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -11,6 +12,18 @@ export const Map = () => {
   const imageBlobURLs = useRef<string[] | null>(null);
 
   const [mapLoaded, setMapLoaded] = useState(false);
+
+  const fetchImageURL = async (eventId: number) => {
+    try {
+      const resp = await fetch(`/api/image/${eventId}/icon`);
+      if (!resp.ok) throw Error();
+
+      const blob = await resp.blob();
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      return null;
+    }
+  };
 
   const fetchGeoJsonData = async () => {
     try {
@@ -22,45 +35,40 @@ export const Map = () => {
     }
   };
 
-  const fetchIconURL = async (eventId: number) => {
-    try {
-      const resp = await fetch(`/api/image/${eventId}/icon`);
-      if (!resp.ok) throw Error();
-
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
-      imageBlobURLs.current?.push(url);
-      return url;
-    } catch (error) {
-      return null;
-    }
-  };
-
   const displayMarkers = async (features: GeoJSON.FeatureCollection) => {
     //Remove any existing markers before creating new ones
     const existingMarkers = document.querySelectorAll(".marker");
     existingMarkers.forEach((marker) => marker.remove());
     const map = mapRef.current;
+    if (!map) return;
 
     for (const feature of features.features) {
       const eventId = feature.properties?.["eventId"];
-      const imageURL = await fetchIconURL(eventId);
+      const iconURL = await fetchImageURL(eventId);
 
       const coords =
         feature.geometry.type === "Point" &&
         (feature.geometry.coordinates as LngLatLike);
 
-      if (!imageURL || !coords || !map) continue;
+      if (!coords) continue;
 
       const el = document.createElement("div");
-
       el.className = "marker";
-      el.style.backgroundImage = `url(${imageURL})`;
+
+      if (iconURL) {
+        imageBlobURLs.current?.push(iconURL)
+        el.style.backgroundImage = `url(${iconURL})`;
+        el.style.border = "0.1rem solid white";
+      } else {
+        el.style.backgroundImage = `url("/map-marker-question.png")`;
+      }
+
       el.style.width = "70px";
       el.style.height = "70px";
       el.style.backgroundSize = "100%";
       el.style.display = "block";
-      el.style.border = "0.1rem solid white";
+      el.style.objectFit = "fill";
+
       el.style.borderRadius = "50%";
       el.style.cursor = "pointer";
       el.style.padding = "0";
@@ -72,11 +80,13 @@ export const Map = () => {
       // Instantiate a popup container to draw the popup
       const popupContainer = document.createElement("div");
       const root = createRoot(popupContainer);
-      root.render(<Popup eventId={eventId} key={eventId} />); // render popup
+      root.render(
+        <Popup marker={feature.properties as markerPropertiesT} key={eventId} />
+      ); // render popup
 
       popUpRef.current?.push(root); // store the popups to unmount them during cleanup
       marker.setPopup(
-        new mapboxgl.Popup().setDOMContent(popupContainer).setMaxWidth("50 px")
+        new mapboxgl.Popup().setDOMContent(popupContainer).setMaxWidth("55vw")
       );
     }
   };
@@ -118,6 +128,9 @@ export const Map = () => {
   return (
     <>
       <div id="map" ref={mapContainerRef} className="absolute inset-0" />
+      <header className="absolute top-0 left-0 z-10 pointer-events-none">
+        <h1>TO Events</h1>
+      </header>
       {mapLoaded && <Options mapRef={mapRef} />}
     </>
   );

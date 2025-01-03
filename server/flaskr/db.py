@@ -3,7 +3,7 @@ from flask import current_app, g
 import sqlite3
 
 from . import fetch
-from flaskr.helper.db import get_cost_obj, get_date_obj, get_event_obj, get_feature_obj, get_image_obj, get_location_obj, get_weekly_date_obj, init_table
+from flaskr.helper import db as db_helper
 
 def get_db():
   if "db" not in g:
@@ -14,12 +14,10 @@ def get_db():
   g.db.row_factory = sqlite3.Row
   return g.db
 
-
 def close_db(e=None):
   db = g.pop("db", None)
   if db is not None:
     db.close()
-
 
 def init_db():
   db = get_db()  
@@ -28,35 +26,42 @@ def init_db():
 
   data = fetch.get_data_from_city_db()  
   for index, data_obj in enumerate(data):   
+    index += 1
     data = data_obj["calEvent"]        
-    event = get_event_obj(data)    
+    event = db_helper.get_event_obj(data)    
     feature = {}
     date = {}
     weeklyDate = {}
     location = {}
     cost = {}
     image = {}
+    reservation = {}
     
-    if "features" in data:      
-      feature = get_feature_obj(index, data["features"])
+    db_helper.update_table(db, event, "event")    
+      
     if "dates" in data:
-      date = get_date_obj(index, data["dates"])
+      date = db_helper.get_date_obj(index, data["dates"])
+      db_helper.update_table(db, date, "date")
+      
     if "weeklyDates" in data:
-      weeklyDate = get_weekly_date_obj(index, data["weeklyDates"])
+      weeklyDate = db_helper.get_weekly_date_obj(index, data["weeklyDates"])
+      db_helper.update_table(db, weeklyDate, "weeklyDate")
+      
     if "locations" in data:      
-      location = get_location_obj(index, data["locations"])
+      location = db_helper.get_location_obj(index, data["locations"])
+      db_helper.update_table(db, location, "location")
+      
     if "cost" in data:
-      cost = get_cost_obj(index, data["cost"])
+      cost = db_helper.get_cost_obj(index, data["cost"])
+      db_helper.update_table(db, cost, "cost")
+      
     if "image" in data:
-      image = get_image_obj(index, data["image"])
+      image = db_helper.get_image_obj(index, data["image"])
+      db_helper.update_table(db, image, "image")
 
-    init_table(db, event, "event")
-    init_table(db, feature, "feature")
-    init_table(db, date, "date")
-    init_table(db, weeklyDate, "weeklyDate")
-    init_table(db, location, "location")
-    init_table(db, cost, "cost")
-    init_table(db, image, "image")
+    if "reservation" in data:
+      reservation = db_helper.get_reservation_obj(index, data["reservation"])
+      db_helper.update_table(db, reservation, "reservation")
 
   db.commit()
  

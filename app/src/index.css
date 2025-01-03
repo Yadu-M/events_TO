@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ... */
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -71,9 +69,32 @@
     @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
   }
   h2 {
-    @apply scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0;
+    @apply scroll-m-20 border-b pb-2 text-base font-semibold tracking-tight first:mt-0
+  }
+  p {
+    @apply text-xs;
+  }
+
+  @media (min-width: 768px) {
+    * {
+      @apply border-border;
+    }
+    body {
+      @apply bg-background text-foreground;
+    }
+    h1 {
+      @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
+    }
+    h2 {
+      @apply scroll-m-20 border-b pb-2 text-2xl font-semibold tracking-tight first:mt-0
+    }
+    p {
+      @apply leading-6;
+    }
   }
 }
+
+
 
 @font-face {
   font-family: "Geist";
