@@ -32,7 +32,7 @@ def get_specific_location_data(id):
   results = {}
 
   try:
-    results = db.execute("SELECT * FROM location WHERE eventId = ?", (id, )).fetchall()
+    results = db.execute("SELECT * FROM location WHERE eventId = ?", (id, )).fetchone()
   except Exception as e:
     abort(500, description=f"Something went wrong while trying to fetch location data: {e}")
 

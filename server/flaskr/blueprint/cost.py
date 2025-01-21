@@ -12,21 +12,9 @@ def get_cost_data(id):
   results = {}
 
   try:
-    results = db.execute("""
-      SELECT 
-        c.child,
-        c.youth,
-        c.student,
-        c.adult,
-        c.senior,
-        c._from,
-        c._to,
-        c.generalAdmission
-      FROM cost as c
-      WHERE c.eventId = ?
-      """, (id,)).fetchone()
+    results = db.execute("SELECT * FROM cost WHERE cost.eventId = ?", (id,)).fetchone()
   except Exception as e:
-    abort(500, description=f"Something went wrong while trying to fetch event data: {e}")
+    abort(500, description=f"Something went wrong while trying to fetch cost data: {e}")
 
   if not results:
     abort(404, description="Couldn't find cost")

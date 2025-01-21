@@ -1,4 +1,4 @@
-export type markerPropertiesT = {
+export interface markerPropertiesT {
   address: string;  
   accessibility: boolean;
   category: string;

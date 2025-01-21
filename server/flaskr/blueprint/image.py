@@ -5,30 +5,9 @@ from flaskr.utils import dict_factory
 
 bp = Blueprint("image", __name__, url_prefix="/image")
 
-@bp.route("/metadata")
-def get_all_icons_metadata():
-  db = get_db()
-  db.row_factory = dict_factory
-  try:
-    query = """
-      SELECT DISTINCT 
-        image.id, image.eventId, image.altText, image.credit, image.url, lat, lng    
-      FROM image
-      INNER JOIN event ON event.id = image.eventId
-      INNER JOIN location ON location.eventId = image.eventId
-      WHERE event.endDate > CURRENT_TIMESTAMP;
-    """
-    results = db.execute(query).fetchall()
-  except Exception as e:    
-    abort(500, description=f"An error occurred: {e}")
-    
-  if not results:
-    abort(404, description="No icons found")
-
-  return jsonify(results)
 
 @bp.route("/<int:id>/image")
-def get_icon_file(id: int):
+def get_image(id: int):
   db = get_db()
   try:
     result = db.execute("SELECT file FROM image WHERE eventId = ?", (id, )).fetchone()
@@ -42,7 +21,7 @@ def get_icon_file(id: int):
   return Response(image_data, mimetype="image/png")
 
 @bp.route("/<int:id>/icon")
-def get_thumbnail(id: int):
+def get_icon(id: int):
   db = get_db()
   try:
     result = db.execute("SELECT thumbNail FROM image WHERE eventId = ?", (id, )).fetchone()
@@ -54,3 +33,18 @@ def get_thumbnail(id: int):
 
   image_data = result
   return Response(image_data, mimetype="image/png")
+
+@bp.route("/<int:id>")
+def get_image_metadata(id: int):
+  db = get_db()
+  db.row_factory = dict_factory
+  result = {}
+  try:
+    result = db.execute("SELECT id, eventId, fileName, fileSize, fileType, altText, credit, url FROM image WHERE eventId = ?", (id, )).fetchone()
+  except Exception:
+    abort(500, description="An error occured while retrieving icon file")
+
+  if not result:
+    abort(404, description="Icon not found")
+
+  return result

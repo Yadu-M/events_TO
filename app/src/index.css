@@ -69,7 +69,7 @@
     @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
   }
   h2 {
-    @apply scroll-m-20 border-b pb-2 text-base font-semibold tracking-tight first:mt-0
+    @apply scroll-m-20 border-b pb-2 text-base font-semibold tracking-tight first:mt-0;
   }
   p {
     @apply text-xs;
@@ -86,15 +86,16 @@
       @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
     }
     h2 {
-      @apply scroll-m-20 border-b pb-2 text-2xl font-semibold tracking-tight first:mt-0
+      @apply scroll-m-20 border-b pb-2 text-2xl font-semibold tracking-tight first:mt-0;
     }
+  }
+
+  @media (min-width: 1024px) {
     p {
       @apply leading-6;
     }
   }
 }
-
-
 
 @font-face {
   font-family: "Geist";

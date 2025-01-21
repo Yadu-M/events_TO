@@ -4,26 +4,14 @@ import { Options } from "../Header/Options";
 import { createRoot, Root } from "react-dom/client";
 import { Popup } from "./Popup";
 import { markerPropertiesT } from "./types";
+import { generateImageURL } from "@/utils";
 
 export const Map = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const popUpRef = useRef<Root[] | null>(null);
   const imageBlobURLs = useRef<string[] | null>(null);
-
   const [mapLoaded, setMapLoaded] = useState(false);
-
-  const fetchImageURL = async (eventId: number) => {
-    try {
-      const resp = await fetch(`/api/image/${eventId}/icon`);
-      if (!resp.ok) throw Error();
-
-      const blob = await resp.blob();
-      return URL.createObjectURL(blob);
-    } catch (error) {
-      return null;
-    }
-  };
 
   const fetchGeoJsonData = async () => {
     try {
@@ -44,7 +32,7 @@ export const Map = () => {
 
     for (const feature of features.features) {
       const eventId = feature.properties?.["eventId"];
-      const iconURL = await fetchImageURL(eventId);
+      const iconURL = await generateImageURL(eventId, "icon");
 
       const coords =
         feature.geometry.type === "Point" &&
@@ -67,7 +55,7 @@ export const Map = () => {
       el.style.height = "70px";
       el.style.backgroundSize = "100%";
       el.style.display = "block";
-      el.style.objectFit = "fill";
+      // el.style.objectFit = "fill";
 
       el.style.borderRadius = "50%";
       el.style.cursor = "pointer";
@@ -86,7 +74,7 @@ export const Map = () => {
 
       popUpRef.current?.push(root); // store the popups to unmount them during cleanup
       marker.setPopup(
-        new mapboxgl.Popup().setDOMContent(popupContainer).setMaxWidth("55vw")
+        new mapboxgl.Popup().setDOMContent(popupContainer).setMaxWidth("75vw")
       );
     }
   };

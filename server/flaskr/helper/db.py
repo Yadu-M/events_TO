@@ -76,20 +76,20 @@ def get_weekly_date_obj(index: int, data: dict):
   description = ""
   for weeklyDateObj in data:
     if "weekDay" in weeklyDateObj:      
-      day += ",".join(weeklyDateObj["weekDay"][0]["day"])
+      day += weeklyDateObj["weekDay"][0]["day"] + ","
     if "startTime" in weeklyDateObj:
-      startTime += ",".join(weeklyDateObj["startTime"])
+      startTime += weeklyDateObj["startTime"] + ","
     if "endTime" in weeklyDateObj:
-      endTime += ",".join(weeklyDateObj["endTime"])
+      endTime += weeklyDateObj["endTime"] + ","
     if "description" in weeklyDateObj:
-      description += ",".join(weeklyDateObj["description"])
+      description += weeklyDateObj["description"] + ","
       
   return {
     "eventId": index,
-    "day": day,
-    "startTime": startTime,
-    "endTime" : endTime,
-    "description": description
+    "day": day[:-1],
+    "startTime": startTime[:-1],
+    "endTime" : endTime[:-1],
+    "description": description[:-1]
   }
 
 def get_location_obj(index: int, data: dict):

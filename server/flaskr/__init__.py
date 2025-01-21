@@ -1,15 +1,18 @@
 from flask import Flask
-
 from flask_cors import CORS
+
 import os
 
 def import_blueprints(app: Flask):
-    from flaskr.blueprint import location, geojson, image, event, cost
+    from flaskr.blueprint import location, geojson, image, event, cost, date, reservation, weeklyDate
     app.register_blueprint(image.bp)
     app.register_blueprint(location.bp)
     app.register_blueprint(geojson.bp)
     app.register_blueprint(event.bp)
     app.register_blueprint(cost.bp)
+    app.register_blueprint(date.bp)
+    app.register_blueprint(reservation.bp)
+    app.register_blueprint(weeklyDate.bp)
 
 def import_commands(app: Flask):
   from . import commands
@@ -37,5 +40,7 @@ def create_app(test_config=None):
 
   import_commands(app)
   import_blueprints(app)
+
+  
 
   return app
