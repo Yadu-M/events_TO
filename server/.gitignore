@@ -9,4 +9,4 @@ env/
 # Flask Stuff
 instance/
 
-static
+static/*

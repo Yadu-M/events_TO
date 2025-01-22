@@ -9,7 +9,7 @@ const rootElemet = document.getElementById("root");
 
 if (rootElemet)
   createRoot(rootElemet).render(
-    <StrictMode>
+    <StrictMode>      
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />} errorElement={<Error />} />

@@ -3,7 +3,7 @@ from flask import jsonify, Blueprint, abort, Response
 from flaskr.db import get_db
 from flaskr.utils import dict_factory
 
-bp = Blueprint("date", __name__, url_prefix="/date")
+bp = Blueprint("date", __name__, url_prefix="/api/date")
 
 @bp.route("/<int:id>")
 def get_date_data(id):
