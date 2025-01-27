@@ -16,7 +16,7 @@ export const Map = () => {
   const fetchGeoJsonData = async () => {
     try {
       const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/geojson/`, {
-        mode: "cors"
+        mode: "same-origin"
       });
       if (!resp.ok) return null;
       return (await resp.json()) as GeoJSON.FeatureCollection;
