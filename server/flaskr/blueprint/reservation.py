@@ -1,9 +1,9 @@
-from flask import jsonify, Blueprint, abort, Response
+from flask import Blueprint, abort
 
 from flaskr.db import get_db
 from flaskr.utils import dict_factory
 
-bp = Blueprint("reservation", __name__, url_prefix="/api/reservation")
+bp = Blueprint("reservation", __name__, url_prefix="/reservation")
 
 @bp.route("/<int:id>")
 def get_cost_data(id):

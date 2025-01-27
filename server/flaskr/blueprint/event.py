@@ -1,9 +1,9 @@
-from flask import jsonify, Blueprint, abort, Response
+from flask import Blueprint, abort
 
 from flaskr.db import get_db
 from flaskr.utils import dict_factory
 
-bp = Blueprint("event", __name__, url_prefix="/api/event")
+bp = Blueprint("event", __name__, url_prefix="/event")
 
 @bp.route("/<int:id>")
 def get_event_data(id):

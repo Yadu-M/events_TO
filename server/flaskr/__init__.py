@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 import os
 
@@ -19,15 +20,28 @@ def import_commands(app: Flask):
   commands.init_app(app)
 
 def create_app(test_config=None):
-  app = Flask(__name__, 
-              static_url_path="/", 
-              static_folder="static") # I've corrected the static folder to match your current structure
+  app = Flask(__name__) 
+
+  app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+  )
   
   CORS(
-    app, 
-    resources={r"/*": {"origins": ["http://localhost/*", "http://127.0.0.1/*"]}},
-    allow_headers=["Content-Type", "Authorization"],  # Specify allowed headers
+    app,
+    resources={
+      r"/*": {
+        "origins": [ 
+          "https://eventto.ca",
+          "https://www.eventto.ca",
+          "http://localhost:5173"
+        ],
+        "methods": ["GET"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": False,
+      }
+    },
   )
+
   app.config.from_mapping(
     SECRET_KEY="dev",
     DATABASE=os.path.join(app.instance_path, 'db.sqlite')
@@ -46,9 +60,20 @@ def create_app(test_config=None):
       print(f"Some error happened: {e}")
 
   import_commands(app)
-  import_blueprints(app)  
+  import_blueprints(app)
+
+  @app.after_request
+  def add_security_headers(response):
+      response.headers['Content-Security-Policy'] = "default-src 'self' eventto.ca"
+      response.headers['X-Content-Type-Options'] = 'nosniff'
+      response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+      return response
   
   return app
 
+def get_app():
+  return create_app()
 
-app = create_app() # create the app instance and set as app
+if __name__ == '__main__':
+  application = create_app()
+  application.run()

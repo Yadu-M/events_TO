@@ -5,7 +5,7 @@ from geojson import FeatureCollection
 from flaskr.helper.geojson import get_geojson_obj
 from flask.helpers import make_response
 
-bp = Blueprint("geojson", __name__, url_prefix="/api/geojson")
+bp = Blueprint("geojson", __name__, url_prefix="/geojson")
 
 @bp.route("/")
 def get_geojson_data():

@@ -66,7 +66,7 @@ export const EventPage = () => {
     dataT: T,
     eventId: number
   ) => {
-    const resp = await fetch(`/api/${dataT}/${eventId}`);
+    const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/${dataT}/${eventId}`);
     if (resp.ok) return (await resp.json()) as TableToTypeMap[T];
     return null;
   };

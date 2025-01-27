@@ -1,9 +1,9 @@
-from flask import jsonify, Blueprint, abort, Response
+from flask import Blueprint, abort, Response
 
 from flaskr.db import get_db
 from flaskr.utils import dict_factory
 
-bp = Blueprint("image", __name__, url_prefix="/api/image")
+bp = Blueprint("image", __name__, url_prefix="/image")
 
 
 @bp.route("/<int:id>/image")

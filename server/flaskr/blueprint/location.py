@@ -3,7 +3,7 @@ from flask import Blueprint, abort
 from flaskr.db import get_db
 from flaskr.utils import dict_factory
 
-bp = Blueprint("location", __name__, url_prefix="/api/location")
+bp = Blueprint("location", __name__, url_prefix="/location")
 
 @bp.route("/")
 def get_location_data():
