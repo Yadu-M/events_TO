@@ -94,7 +94,7 @@ export const Map = () => {
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       center: [-79.347015, 43.65107],
-      zoom: 15.1,
+      zoom: 10.5,
       pitch: 62,
       bearing: -20,
     });
