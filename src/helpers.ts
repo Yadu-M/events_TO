@@ -1,4 +1,4 @@
-import { z, ZodObject, ZodSchema } from 'zod';
+import { z } from 'zod';
 import { eventPayloadSchema } from './schema';
 
 export async function fetchEventData(baseURL: string) {
@@ -49,7 +49,6 @@ function sanitizeData(event: object) {
 		}
 	}
 
-
 	if ('locations' in event) {
 		if (Array.isArray(event['locations'])) {
 			event['locations'] = event['locations'].filter((locationObj: object) => 'type' in locationObj && locationObj['type'] === 'marker');
@@ -66,11 +65,7 @@ export function parseData(data: { calEvent: any }[]) {
 		sanitizeData(event);
 		const result = eventPayloadSchema.safeParse(event);
 
-		if (!result.success) {
-			console.log(result.error.message);
-		} else {
-			parsedData.push(result.data);
-		}
+		if (result.success) parsedData.push(result.data);
 	}
 
 	return parsedData;

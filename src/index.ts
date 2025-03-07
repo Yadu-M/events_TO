@@ -1,7 +1,7 @@
 import { updateDb } from './updateDB';
 
 export default {
-	async fetch(request, env): Promise<Response> {
+	async fetch(request, env, ctx: ExecutionContext): Promise<Response> {
 		const { pathname } = new URL(request.url);
 		const DB = env.DB;
 
