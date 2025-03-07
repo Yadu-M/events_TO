@@ -5,7 +5,7 @@ from flaskr.utils import dict_factory
 
 bp = Blueprint("date", __name__, url_prefix="/date")
 
-@bp.route("/<int:id>")
+@bp.route("/<int:id>", methods=["GET"])
 def get_date_data(id):
   db = get_db()
   db.row_factory = dict_factory

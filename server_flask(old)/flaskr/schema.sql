@@ -35,7 +35,6 @@ CREATE TABLE
     orgAddress            TINYTEXT NOT NULL,
     orgPhone              TINYTEXT NOT NULL,
     orgPhoneExt           TINYTEXT,
-    orgFax                TINYTEXT,
     orgEmail              TINYTEXT NOT NULL,
     orgType               TINYTEXT,
     orgTypeOther          TINYTEXT,
