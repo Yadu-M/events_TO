@@ -133,7 +133,6 @@ export async function resetDb(DB: D1Database) {
 }
 
 export function insert(db: D1Database) {
-	// Helper to build SQL INSERT query
 	function queryBuilder(keys: string[], table: string): string {
 		const separatedKeys = keys.join(',');
 		const placeholders = keys.map(() => '?').join(',');
@@ -141,28 +140,22 @@ export function insert(db: D1Database) {
 	}
 
 	return (table: ZodSchema) => {
-		// Cast the schema to ZodObject to access shape
 		const tableObject = table as ZodObject<any>;
 		const tableShape = tableObject.shape;
 		const tableKeys = Object.keys(tableShape);
+		const tableName = table._def.description || 'default_table'; 
 
-		// Fallback table name (adjust as needed)
-		const tableName = table._def.description!
+		return (obj: object) => {
+			if (isEmpty(obj)) return null;
 
-		return async (obj: object) => {
-			if (isEmpty(obj)) return;
-
-			// Map the event object keys to the table schema keys
 			const values: any[] = [];
 			const mappedKeys: string[] = [];
 
 			for (const key of tableKeys) {
 				if (key === 'eventId') {
-					// Special case: map eventId to the 'id' from the event object
 					mappedKeys.push('eventId');
-					values.push((obj as any).eventId); // Assuming 'id' exists in the event object
+					values.push((obj as any).eventId);
 				} else if (key in obj) {
-					// Only include keys that exist in both the table schema and the event object
 					mappedKeys.push(key);
 					values.push((obj as any)[key] ?? null);
 				}
@@ -173,15 +166,7 @@ export function insert(db: D1Database) {
 			}
 
 			const query = queryBuilder(mappedKeys, tableName);
-
-			try {
-				await db
-					.prepare(query)
-					.bind(...values)
-					.run();
-			} catch (error) {
-				throw new Error(`Failed to insert into ${tableName}: ${(error as Error).message}`);
-			}
+			return db.prepare(query).bind(...values);
 		};
 	};
 }
