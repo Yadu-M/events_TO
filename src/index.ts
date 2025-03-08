@@ -7,8 +7,7 @@ export default {
 
 		if (request.method === 'POST' && pathname === '/api/updateDb') {
 			try {
-				await updateDb(DB, env.CITY_API_BASE_URL);
-				return new Response('Success');
+				return updateDb(DB, env.CITY_API_BASE_URL);
 			} catch (error) {
 				console.log(error);
 				return new Response((error as Error).message, { status: 500 });
