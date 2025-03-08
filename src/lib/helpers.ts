@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { eventPayloadSchema } from './schema';
+import { eventPayloadSchema } from '../db/schema';
 
 export async function fetchEventData(baseURL: string) {
 	const params = { id: 'festivals-events' };

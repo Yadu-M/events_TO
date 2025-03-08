@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { eventPayloadSchema } from './schema';
+import { eventPayloadSchema } from '../db/schema';
 
 export function extractEvent(event: z.infer<typeof eventPayloadSchema>) {
 	return {
@@ -84,7 +84,7 @@ export function extractLocation(event: z.infer<typeof eventPayloadSchema>, id: n
 export function extractCost(event: z.infer<typeof eventPayloadSchema>, id: number) {
 	const cost = event.cost;
 
-	if (!cost) return {}
+	if (!cost) return {};
 
 	return {
 		eventId: id,

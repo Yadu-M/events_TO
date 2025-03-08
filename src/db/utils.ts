@@ -1,6 +1,6 @@
 import { ZodObject, ZodSchema } from 'zod';
 import { D1Database } from '@cloudflare/workers-types';
-import { isEmpty } from './helpers';
+import { isEmpty } from '../lib/helpers';
 
 export async function resetDb(DB: D1Database) {
 	await DB.prepare(
@@ -143,7 +143,7 @@ export function insert(db: D1Database) {
 		const tableObject = table as ZodObject<any>;
 		const tableShape = tableObject.shape;
 		const tableKeys = Object.keys(tableShape);
-		const tableName = table._def.description || 'default_table'; 
+		const tableName = table._def.description || 'default_table';
 
 		return (obj: object) => {
 			if (isEmpty(obj)) return null;

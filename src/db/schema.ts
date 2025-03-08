@@ -158,6 +158,7 @@ export const eventTableSchema = z
 
 export const dateTableSchema = z
 	.object({
+		id: z.number().optional(),
 		eventId: z.number(),
 		allDay: z.string().nullable(),
 		startDate: z.string().datetime(),
@@ -167,6 +168,7 @@ export const dateTableSchema = z
 
 export const weeklyDateTableSchema = z
 	.object({
+		id: z.number().optional(),
 		eventId: z.number(),
 		day: z.string(),
 		startTime: z.string().datetime(),
@@ -176,17 +178,19 @@ export const weeklyDateTableSchema = z
 
 export const locationTableSchema = z
 	.object({
+		id: z.number().optional(),
 		eventId: z.number(),
 		lat: z.number(),
 		lng: z.number(),
 		locationName: z.string(),
-		address: z.string().optional(),
-		displayAddress: z.string().optional(),
+		address: z.string().nullable(),
+		displayAddress: z.string().nullable(),
 	})
 	.describe('location');
 
 export const costTableSchema = z
 	.object({
+		id: z.number().optional(),
 		eventId: z.number(),
 		child: z.number().optional(),
 		youth: z.number().optional(),
@@ -201,6 +205,7 @@ export const costTableSchema = z
 
 export const reservationTableSchema = z
 	.object({
+		id: z.number().optional(),
 		eventId: z.number(),
 		website: z.string().optional(),
 		phone: z.string().optional(),

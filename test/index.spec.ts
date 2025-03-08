@@ -31,3 +31,17 @@ describe('Update database', () => {
 		expect(await response.text()).toBe('Success');
 	});
 });
+
+
+describe('Fetch GeoJSON', () => {
+	it('fetched geojson', async () => {
+		const request = new IncomingRequest(`${baseURL}/api/geojson`, {
+			method: 'GET',
+			headers: { Authorization: `Bearer ${env.API_TOKEN}` },
+		});
+		const ctx = createExecutionContext();
+		const response = await worker.fetch(request, env);
+		await waitOnExecutionContext(ctx);
+		expect(await response.text()).toBe('Success');
+	});
+});

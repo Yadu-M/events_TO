@@ -1,17 +1,18 @@
-import { z } from 'zod';
-import { insert, resetDb } from './db';
-import { extractCost, extractDate, extractEvent, extractLocation, extractReservation, extractWeeklyDate } from './extract';
+import { insert, resetDb } from '../db/utils';
+import { extractCost, extractDate, extractEvent, extractLocation, extractReservation, extractWeeklyDate } from '../lib/extract';
 import {
 	costTableSchema,
 	dateTableSchema,
-	eventPayloadSchema,
 	eventTableSchema,
 	locationTableSchema,
 	reservationTableSchema,
 	weeklyDateTableSchema,
-} from './schema';
+} from '../db/schema';
+import { fetchEventData, parseData } from '../lib/helpers';
 
-export async function updateDb(DB: D1Database, parsedData: z.infer<typeof eventPayloadSchema>[]) {
+export async function updateDb(DB: D1Database, URL: string) {
+	const data = await fetchEventData(URL);
+	const parsedData = parseData(data as { calEvent: any }[]);
 	// Drops every table
 	await resetDb(DB);
 
@@ -46,5 +47,7 @@ export async function updateDb(DB: D1Database, parsedData: z.infer<typeof eventP
 	if (reservationStmts.length > 0) statements.push(...reservationStmts);
 
 	const results = await Promise.all(await DB.batch(statements));
-	return results.some((result) => !result.error);
+	const result = results.some((result) => !result.error);
+
+	return result ? new Response('Success', { status: 200 }) : new Response('failed to update database', { status: 500 });
 }
