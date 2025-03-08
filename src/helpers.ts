@@ -66,12 +66,13 @@ export function parseData(data: { calEvent: any }[]) {
 		const result = eventPayloadSchema.safeParse(event);
 
 		if (result.success) parsedData.push(result.data);
+		else console.log(result.error.errors);
 	}
 
 	return parsedData;
 }
 
 export function isEmpty(obj: object) {
-	for (const i in obj) return false;
+	for (const _ in obj) return false;
 	return true;
 }

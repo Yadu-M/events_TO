@@ -38,6 +38,23 @@ const costObj = z.object({
 	senior: z.number().optional(),
 });
 
+export const imageObj = z.object({
+	fileName: z.string().optional(),
+	alText: z.string().optional(),
+	binId: z.string().optional(),
+	fileSize: z.number().optional(),
+	filetype: z.string().trim().optional(),
+	url: z
+		.string()
+		.trim()
+		.transform((val) => {
+			if (val === '') return undefined;
+			return `https://secure.toronto.ca/${val}`;
+		})
+		.pipe(z.string().url().optional())
+		.optional(),
+});
+
 export const eventPayloadSchema = z.object({
 	id: z.number(),
 	eventName: z.string(), // event name
@@ -63,8 +80,8 @@ export const eventPayloadSchema = z.object({
 	eventPhoneExt: z
 		.string()
 		.or(z.literal(''))
-		.optional()
-		.transform((val) => (val === '' ? null : val)), // event phone extension
+		.transform((val) => (val === '' ? null : val))
+		.optional(), // event phone extension
 	partnerType: partnerValues, //	event partner type
 	partnerName: z.string().optional(), //	event partner name
 	expectedAvg: z.number().optional().nullable(), // expected average attendance
@@ -92,20 +109,8 @@ export const eventPayloadSchema = z.object({
 	description: z.string(),
 	allDay: z.boolean().optional(),
 	reservationsRequired: z.string().transform((val) => val === 'Yes'),
-	// image	object	Event Image
-	//   image.fileName	String	file name
-	//   image.fileSize	String	file size
-	//   image.fileType	String	file type
-	//   image.binId	String	internal id
-	//   image.altText	String	alternative text
-	//   image.credit	String	image credit
-
-	// thumbImage	object	Thumbnail of event image
-	//   thumbImage.fileName	String	file name
-	//   thumbImage.fileSize	String	file size
-	//   thumbImage.fileType	String	file type
-	//   thumbImagee.binId	String	internal id
-
+	image: imageObj.optional(),
+	thumbImage: imageObj.optional(),
 	orgName: z.string(), //	Organization Name
 	contactName: z.string(), //	Contact Name
 	contactTitle: z.string().optional(), //	Title
@@ -193,7 +198,6 @@ export const costTableSchema = z
 		generalAdmission: z.number().optional(),
 	})
 	.describe('cost');
-// const imageTable = z.object({})
 
 export const reservationTableSchema = z
 	.object({

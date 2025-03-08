@@ -1,20 +1,18 @@
+import { z } from 'zod';
 import { insert, resetDb } from './db';
 import { extractCost, extractDate, extractEvent, extractLocation, extractReservation, extractWeeklyDate } from './extract';
-import { fetchEventData, parseData } from './helpers';
 import {
 	costTableSchema,
 	dateTableSchema,
+	eventPayloadSchema,
 	eventTableSchema,
 	locationTableSchema,
 	reservationTableSchema,
 	weeklyDateTableSchema,
 } from './schema';
 
-export async function updateDb(DB: D1Database, apiBaseUrl: string) {
-	const data = await fetchEventData(apiBaseUrl);
-	const parsedData = parseData(data as { calEvent: any }[]);
-
-	// Reset DB
+export async function updateDb(DB: D1Database, parsedData: z.infer<typeof eventPayloadSchema>[]) {
+	// Drops every table
 	await resetDb(DB);
 
 	// Initialize insert functions
@@ -40,16 +38,13 @@ export async function updateDb(DB: D1Database, apiBaseUrl: string) {
 		await DB.batch(eventStmts);
 	}
 
-	// Then insert dependent tables (order doesn’t matter among these)
-	await Promise.all(
-		[
-			dateStmts.length > 0 && DB.batch(dateStmts),
-			weeklyDateStmts.length > 0 && DB.batch(weeklyDateStmts),
-			locationStmts.length > 0 && DB.batch(locationStmts),
-			costStmts.length > 0 && DB.batch(costStmts),
-			reservationStmts.length > 0 && DB.batch(reservationStmts),
-		].filter(Boolean)
-	);
+	const statements: D1PreparedStatement[] = [];
+	if (dateStmts.length > 0) statements.push(...dateStmts);
+	if (weeklyDateStmts.length > 0) statements.push(...weeklyDateStmts);
+	if (locationStmts.length > 0) statements.push(...locationStmts);
+	if (costStmts.length > 0) statements.push(...costStmts);
+	if (reservationStmts.length > 0) statements.push(...reservationStmts);
 
-	return new Response('Success', { status: 200 });
+	const results = await Promise.all(await DB.batch(statements));
+	return results.some((result) => !result.error);
 }

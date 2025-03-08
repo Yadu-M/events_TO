@@ -2,6 +2,9 @@
 
 interface Env {
 	CITY_API_BASE_URL: "https://secure.toronto.ca/cc_sr_v1/data/edc_eventcal_APR?limit=500";
-	CITY_API_SECURE_URL: "https://secure.toronto.ca";
+	API_TOKEN: string;
+	ACCOUNT_ID: string;
+	CLOUDFLARE_IMAGE_API_TOKEN: string;
+	bucket: R2Bucket;
 	DB: D1Database;
 }
