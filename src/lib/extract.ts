@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { eventPayloadSchema } from '../db/schema';
+import {
+	costTableSchema,
+	dateTableSchema,
+	eventPayloadSchema,
+	locationTableSchema,
+	reservationTableSchema,
+	weeklyDateTableSchema,
+} from '../db/schema';
 
 export function extractEvent(event: z.infer<typeof eventPayloadSchema>) {
 	return {
@@ -31,20 +38,20 @@ export function extractEvent(event: z.infer<typeof eventPayloadSchema>) {
 		description: event.description,
 		allDay: event.allDay,
 		reservationsRequired: event.reservationsRequired,
-		features: event.features,
+		features: event.features?.toString(),
 	};
 }
 
-export function extractDate(event: z.infer<typeof eventPayloadSchema>, id: number) {
+export function extractDate(event: z.infer<typeof eventPayloadSchema>, id: number): z.infer<typeof dateTableSchema> {
 	return {
-		eventId: id,
 		allDay: event.allDay,
-		startDate: event.startDate,
 		endDate: event.endDate,
+		eventId: id,
+		startDate: event.startDate,
 	};
 }
 
-export function extractWeeklyDate(event: z.infer<typeof eventPayloadSchema>, id: number) {
+export function extractWeeklyDate(event: z.infer<typeof eventPayloadSchema>, id: number): z.infer<typeof weeklyDateTableSchema> | {} {
 	const weeklyDates = event.weeklyDates;
 
 	if (!weeklyDates || weeklyDates.length === 0) {
@@ -67,21 +74,27 @@ export function extractWeeklyDate(event: z.infer<typeof eventPayloadSchema>, id:
 	};
 }
 
-export function extractLocation(event: z.infer<typeof eventPayloadSchema>, id: number) {
+export function extractLocation(event: z.infer<typeof eventPayloadSchema>, id: number): z.infer<typeof locationTableSchema> | {} {
+	type locationT = z.infer<typeof locationTableSchema>;
 	const [location] = event.locations.filter((location) => location.type === 'marker');
 	if (!location) return {};
 
-	const result = {
+	const result: locationT = {
 		eventId: id,
 		lat: location.coords.lat,
 		lng: location.coords.lng,
 		locationName: location.locationName,
 		displayAddress: location.displayAddress,
+		address: location.address,
+		imageAlText: event.image?.altText,
+		imageUrl: event.image?.url,
+		thumbnailUrl: event.thumbImage?.url,
 	};
+
 	return result;
 }
 
-export function extractCost(event: z.infer<typeof eventPayloadSchema>, id: number) {
+export function extractCost(event: z.infer<typeof eventPayloadSchema>, id: number): z.infer<typeof costTableSchema> | {} {
 	const cost = event.cost;
 
 	if (!cost) return {};
@@ -93,18 +106,21 @@ export function extractCost(event: z.infer<typeof eventPayloadSchema>, id: numbe
 		student: cost?.student,
 		adult: cost?.adult,
 		senior: cost?.senior,
-		_from: cost?.from,
-		_to: cost?.to,
+		priceFrom: cost?.from,
+		priceTo: cost?.to,
 		generalAdmission: cost?.ga,
 	};
 }
 
-export function extractReservation(event: z.infer<typeof eventPayloadSchema>, id: number) {
+export function extractReservation(event: z.infer<typeof eventPayloadSchema>, id: number): z.infer<typeof reservationTableSchema> | {} {
+	if (!event.reservation) return {};
+	const reservation = event.reservation;
+
 	return {
+		email: reservation.email,
+		phone: reservation.phone,
+		phoneExt: reservation.phoneExt,
+		website: reservation.website,
 		eventId: id,
-		website: event.eventWebsite,
-		phone: event.eventPhone,
-		phoneExt: event.eventPhoneExt,
-		email: event.eventEmail,
 	};
 }

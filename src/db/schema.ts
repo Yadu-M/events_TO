@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import he from 'he';
 
 const dayEnums = z.enum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
 const partnerValues = z.enum(['presentedby', 'producedby', 'sponsoredby', 'none', 'supportedby', 'fundedby']);
@@ -15,16 +16,18 @@ const weeklyDatesObj = z.object({
 	endTime: z.string().datetime().optional(),
 });
 
+const coordsObj = z.object({
+	lng: z.number(),
+	lat: z.number(),
+});
+
 const locationObj = z.object({
 	locationName: z.string(),
 	address: z.string(),
 	type: locationMarkerValues,
 	geoCoded: z.boolean(),
 	displayAddress: z.string().optional(),
-	coords: z.object({
-		lng: z.number(),
-		lat: z.number(),
-	}),
+	coords: coordsObj,
 });
 
 const costObj = z.object({
@@ -40,24 +43,55 @@ const costObj = z.object({
 
 export const imageObj = z.object({
 	fileName: z.string().optional(),
-	alText: z.string().optional(),
+	altText: z.string().optional(),
 	binId: z.string().optional(),
 	fileSize: z.number().optional(),
-	filetype: z.string().trim().optional(),
+	fileType: z.string().trim().optional(),
+	credit: z.string().optional(),
 	url: z
 		.string()
 		.trim()
 		.transform((val) => {
 			if (val === '') return undefined;
-			return `https://secure.toronto.ca/${val}`;
+			return `https://secure.toronto.ca/${encodeURI(val)}`;
 		})
 		.pipe(z.string().url().optional())
 		.optional(),
 });
 
+const reservationObject = z.object({
+	website: z
+		.string()
+		.trim()
+		.url()
+		.or(z.literal(''))
+		.optional()
+		.transform((val) => (val === '' ? null : val)), //	URL	event website
+	email: z
+		.string()
+		.trim()
+		.email()
+		.or(z.literal(''))
+		.optional()
+		.transform((val) => (val === '' ? null : val)), //	email	event email
+	phone: z
+		.string()
+		.or(z.literal(''))
+		.optional()
+		.transform((val) => (val === '' ? null : val)), // event phone
+	phoneExt: z
+		.string()
+		.or(z.literal(''))
+		.transform((val) => (val === '' ? null : val))
+		.optional(), // event phone extension
+});
+
 export const eventPayloadSchema = z.object({
 	id: z.number(),
-	eventName: z.string(), // event name
+	eventName: z
+		.string()
+		.trim()
+		.transform((val) => he.decode(val)),
 	eventWebsite: z
 		.string()
 		.trim()
@@ -90,15 +124,17 @@ export const eventPayloadSchema = z.object({
 	accessibility: accessibilityValues.transform((val) => (val === 'full' ? true : false)), //	Event location/venue accessibility
 	features: z
 		.record(featureKeys, z.boolean())
-		.transform((val) =>
-			[val['Bike Racks'], val['Free Parking'], val['Onsite Food and Beverages'], val['Paid Parking'], val['Public Washrooms']]
-				.filter((status) => status)
-				.join(',')
-		)
+		.transform((val) => {
+			const features: string[] = [];
+			for (const [key, value] of Object.entries(val)) {
+				if (value) features.push(key);
+			}
+			return features;
+		})
 		.optional(), //array of Objects	event features
 	frequency: frequencyValues.optional(), //	event frequency
-	startDate: z.string().datetime().optional(), //	overall start date
-	endDate: z.string().datetime().optional(), // overall end date
+	startDate: z.string().datetime(), //	overall start date
+	endDate: z.string().datetime(), // overall end date
 	dates: z.array(z.record(datesValues, z.string().datetime().nullable())), // Array of dates for the event
 	weeklyDates: z.array(weeklyDatesObj).optional(), // array of Objects	Array of weekly date information
 	timeInfo: z.string().optional(), //	additional time information
@@ -106,7 +142,7 @@ export const eventPayloadSchema = z.object({
 	freeEvent: z.string().transform((val) => val === 'Yes'), //	Free Event Indiciator
 	cost: costObj.optional(), //	object	Various costs
 	otherCostInfo: z.string().optional(), //	Other Cost Information
-	description: z.string(),
+	description: z.string().transform((val) => he.decode(val)),
 	allDay: z.boolean().optional(),
 	reservationsRequired: z.string().transform((val) => val === 'Yes'),
 	image: imageObj.optional(),
@@ -120,6 +156,7 @@ export const eventPayloadSchema = z.object({
 	orgEmail: z.string().trim().email(), //	Email
 	orgType: orgTypes.optional(), //	Organization Type
 	orgTypeOther: z.string().optional(), //	Other
+	reservation: reservationObject.optional(),
 });
 
 export const eventTableSchema = z
@@ -132,7 +169,7 @@ export const eventTableSchema = z
 		eventPhoneExt: z.string().nullable(),
 		partnerType: z.string().nullable(),
 		partnerName: z.string().nullable(),
-		expectedAvg: z.number(),
+		expectedAvg: z.number().nullable(),
 		accessibility: z.string(),
 		frequency: z.string(),
 		startDate: z.string().datetime(),
@@ -160,19 +197,19 @@ export const dateTableSchema = z
 	.object({
 		id: z.number().optional(),
 		eventId: z.number(),
-		allDay: z.string().nullable(),
+		allDay: z.boolean().optional(),
 		startDate: z.string().datetime(),
 		endDate: z.string().datetime(),
 	})
-	.describe('date');
+	.describe('event_date');
 
 export const weeklyDateTableSchema = z
 	.object({
 		id: z.number().optional(),
 		eventId: z.number(),
-		day: z.string(),
-		startTime: z.string().datetime(),
-		endTime: z.string().datetime(),
+		day: z.string().optional(),
+		startTime: z.string().datetime().optional(),
+		endTime: z.string().datetime().optional(),
 	})
 	.describe('weeklyDate');
 
@@ -183,8 +220,11 @@ export const locationTableSchema = z
 		lat: z.number(),
 		lng: z.number(),
 		locationName: z.string(),
-		address: z.string().nullable(),
-		displayAddress: z.string().nullable(),
+		address: z.string().optional(),
+		displayAddress: z.string().optional(),
+		thumbnailUrl: z.string().optional(),
+		imageUrl: z.string().optional(),
+		imageAlText: z.string().optional(),
 	})
 	.describe('location');
 
@@ -197,8 +237,8 @@ export const costTableSchema = z
 		student: z.number().optional(),
 		adult: z.number().optional(),
 		senior: z.number().optional(),
-		_from: z.number().optional(),
-		_to: z.number().optional(),
+		priceFrom: z.number().optional(),
+		priceTo: z.number().optional(),
 		generalAdmission: z.number().optional(),
 	})
 	.describe('cost');
@@ -213,3 +253,8 @@ export const reservationTableSchema = z
 		email: z.string().optional(),
 	})
 	.describe('reservation');
+
+export const clusterTableSchema = z.object({
+	id: z.string(),
+	locationName: z.string(),
+});

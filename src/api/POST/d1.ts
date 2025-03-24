@@ -1,5 +1,5 @@
-import { insert, resetDb } from '../db/utils';
-import { extractCost, extractDate, extractEvent, extractLocation, extractReservation, extractWeeklyDate } from '../lib/extract';
+import { insert, resetDb } from '../../db/utils';
+import { extractCost, extractDate, extractEvent, extractLocation, extractReservation, extractWeeklyDate } from '../../lib/extract';
 import {
 	costTableSchema,
 	dateTableSchema,
@@ -7,10 +7,10 @@ import {
 	locationTableSchema,
 	reservationTableSchema,
 	weeklyDateTableSchema,
-} from '../db/schema';
-import { fetchEventData, parseData } from '../lib/helpers';
+} from '../../db/schema';
+import { fetchEventData, parseData } from '../../lib/helpers';
 
-export async function updateDb(DB: D1Database, URL: string) {
+export async function updateDbHandler(DB: D1Database, URL: string) {
 	const data = await fetchEventData(URL);
 	const parsedData = parseData(data as { calEvent: any }[]);
 	// Drops every table

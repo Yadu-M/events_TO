@@ -8,7 +8,7 @@ export async function fetchEventData(baseURL: string) {
 	return await response.json();
 }
 
-function sanitizeData(event: object) {
+function sanitizeData(event: object) {	
 	if ('dates' in event) {
 		if (Array.isArray(event['dates'])) {
 			event['dates'] = event['dates'].map((dateObj: { string: any }) => {

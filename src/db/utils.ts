@@ -5,56 +5,54 @@ import { isEmpty } from '../lib/helpers';
 export async function resetDb(DB: D1Database) {
 	await DB.prepare(
 		`
-    DROP TABLE IF EXISTS date;
-    DROP TABLE IF EXISTS weeklyDate;
-    DROP TABLE IF EXISTS location;
-    DROP TABLE IF EXISTS cost;
+    DROP TABLE IF EXISTS reservation;
     DROP TABLE IF EXISTS image;
-    DROP TABLE IF EXISTS reservation;    
+    DROP TABLE IF EXISTS cost;
+    DROP TABLE IF EXISTS location;
+    DROP TABLE IF EXISTS weeklyDate;
+    DROP TABLE IF EXISTS event_date; -- Renamed from "date"
     DROP TABLE IF EXISTS event;
 
     CREATE TABLE
       event (
         id                    INTEGER PRIMARY KEY,
-        eventName             TINYTEXT NOT NULL,
-        eventWebsite          TINYTEXT,
-        eventEmail            TINYTEXT,
-        eventPhone            TINYTEXT,
-        eventPhoneExt         TINYTEXT,
-        partnerType           TINYTEXT,
-        partnerName           TINYTEXT,
+        eventName             TEXT NOT NULL,
+        eventWebsite          TEXT,
+        eventEmail            TEXT,
+        eventPhone            TEXT,
+        eventPhoneExt         TEXT,
+        partnerType           TEXT,
+        partnerName           TEXT,
         expectedAvg           INTEGER,
-        accessibility         TINYTEXT NOT NULL,
-        frequency             TINYTEXT NOT NULL,
-        startDate             DATETIME NOT NULL,
-        endDate               DATETIME NOT NULL,
-        timeInfo              TINYTEXT,
-        freeEvent             TINYTEXT NOT NULL,
-        orgName               TINYTEXT NOT NULL,
-        contactName           TINYTEXT NOT NULL,
-        contactTitle          TINYTEXT,
-        orgAddress            TINYTEXT NOT NULL,
-        orgPhone              TINYTEXT NOT NULL,
-        orgPhoneExt           TINYTEXT,
-        orgEmail              TINYTEXT NOT NULL,
-        orgType               TINYTEXT,
-        orgTypeOther          TINYTEXT,
-        categoryString        TINYTEXT NOT NULL,
-        description           TINYTEXT NOT NULL,
-        allDay                TINYTEXT,
-        reservationsRequired  TINYTEXT NOT NULL,
-        features              TINYTEXT
+        accessibility         TEXT NOT NULL,
+        frequency             TEXT NOT NULL,
+        startDate             TEXT NOT NULL, -- Changed to TEXT for SQLite
+        endDate               TEXT NOT NULL, -- Changed to TEXT for SQLite
+        timeInfo              TEXT,
+        freeEvent             TEXT NOT NULL,
+        orgName               TEXT NOT NULL,
+        contactName           TEXT NOT NULL,
+        contactTitle          TEXT,
+        orgAddress            TEXT NOT NULL,
+        orgPhone              TEXT NOT NULL,
+        orgPhoneExt           TEXT,
+        orgEmail              TEXT NOT NULL,
+        orgType               TEXT,
+        orgTypeOther          TEXT,
+        categoryString        TEXT NOT NULL,
+        description           TEXT NOT NULL,
+        allDay                TEXT, -- Consider if this is needed here
+        reservationsRequired  TEXT NOT NULL,
+        features              TEXT
       );
 
-
     CREATE TABLE
-      date (
+      event_date (
         id                    INTEGER PRIMARY KEY AUTOINCREMENT,
         eventId               INTEGER NOT NULL,
-        allDay                TINYTEXT,
-        startDate             DATETIME NOT NULL,
-        endDate               DATETIME NOT NULL,  
-
+        allDay                TEXT,
+        startDate             TEXT NOT NULL,
+        endDate               TEXT NOT NULL,  
         FOREIGN KEY (eventId) REFERENCES event (id)
       );
 
@@ -62,27 +60,27 @@ export async function resetDb(DB: D1Database) {
       weeklyDate (
         id                    INTEGER PRIMARY KEY AUTOINCREMENT,
         eventId               INTEGER NOT NULL,
-        day                   TINYTEXT,
-        startTime             DATETIME,
-        endTime               DATETIME,
-
+        day                   TEXT,
+        startTime             TEXT, -- Changed to TEXT for SQLite
+        endTime               TEXT, -- Changed to TEXT for SQLite
         FOREIGN KEY (eventId) REFERENCES event (id)
       );
-
 
     CREATE TABLE
       location (
         id                    INTEGER PRIMARY KEY AUTOINCREMENT,
         eventId               INTEGER NOT NULL,
-        lat                   INTEGER NOT NULL,
-        lng                   INTEGER NOT NULL,
-        locationName          TINYTEXT NOT NULL,
-        address               TINYTEXT,    
-        displayAddress        TINYTEXT,
+        lat                   REAL NOT NULL, -- Changed to REAL for decimals
+        lng                   REAL NOT NULL, -- Changed to REAL for decimals
+        locationName          TEXT NOT NULL,
+        address               TEXT,    
+        displayAddress        TEXT,
+        thumbnailUrl          TEXT,
+        imageUrl              TEXT,
+        imageAlText           TEXT,
 
         FOREIGN KEY (eventId) REFERENCES event (id)
       );
-
 
     CREATE TABLE
       cost (
@@ -93,39 +91,35 @@ export async function resetDb(DB: D1Database) {
         student               INTEGER,
         adult                 INTEGER,
         senior                INTEGER,
-        _from                 INTEGER,
-        _to                   INTEGER,
+        priceFrom             INTEGER, -- Renamed from "_from"
+        priceTo               INTEGER, -- Renamed from "_to"
         generalAdmission      INTEGER,
-
         FOREIGN KEY (eventId) REFERENCES event (id)
       );
-
 
     CREATE TABLE
       image (
         id                    INTEGER PRIMARY KEY AUTOINCREMENT,
         eventId               INTEGER NOT NULL,
-        fileName              TINYTEXT,
-        fileSize              TINYTEXT,
-        fileType              TINYTEXT,
-        altText               TINYTEXT NOT NULL,
-        credit                TINYTEXT,
-        url                   TINYTEXT NOT NULL,
-        file                  BLOB NOT NULL,
-        thumbNail             BLOB NOT NULL,
-
+        fileName              TEXT,
+        fileSize              TEXT,
+        fileType              TEXT,
+        altText               TEXT NOT NULL,
+        credit                TEXT,
+        url                   TEXT NOT NULL,
+        file                  BLOB NOT NULL, -- Consider if this is needed with url
+        thumbNail             BLOB NOT NULL, -- Consider if this is needed with url
         FOREIGN KEY (eventId) REFERENCES event (id)
       );
-
 
     CREATE TABLE
       reservation (
         id                    INTEGER PRIMARY KEY AUTOINCREMENT,
         eventId               INTEGER NOT NULL,
-        website               TINYTEXT,
-        phone                 TINYTEXT,
-        phoneExt              TINYTEXT,
-        email                 TINYTEXT,
+        website               TEXT,
+        phone                 TEXT,
+        phoneExt              TEXT,
+        email                 TEXT,
         FOREIGN KEY (eventId) REFERENCES event (id)
       );
   `

@@ -1,127 +1,96 @@
-import { useRef, useEffect, useState } from "react";
-import mapboxgl, { LngLatLike } from "mapbox-gl";
-import { Options } from "../Header/Options";
-import { createRoot, Root } from "react-dom/client";
-import { Popup } from "./Popup";
-import { markerPropertiesT } from "./types";
-import { generateImageURL } from "@/utils";
+import { useRef, useState, useEffect } from 'react';
+import mapboxgl from 'mapbox-gl';
+import { Options } from '../Header/Options';
+import { useQuery } from '@tanstack/react-query';
+import { fetchGeoJSON } from '@/api/api';
+import { useMapbox } from '@/Hooks/useMapbox';
+import { ClusterFeatureCollection } from '../types';
+import { useMarkers } from '@/Hooks/useMarkers';
+import { createPortal } from 'react-dom';
+import { Popup } from './Popup';
+import { ClusterPopup } from './ClusterPopup';
 
 export const Map = () => {
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const popUpRef = useRef<Root[] | null>(null);
-  const imageBlobURLs = useRef<string[] | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
+	const [activeCluster, setActiveCluster] = useState<ClusterFeatureCollection | null>(null);
+	const mapContainerRef = useRef<HTMLDivElement>(null);
+	const popupRef = useRef<mapboxgl.Popup | null>(null);
+	const popupContainerRef = useRef<HTMLDivElement>(document.createElement('div'));
+	const { map, mapLoaded } = useMapbox(mapContainerRef);
 
-  const fetchGeoJsonData = async () => {
-    try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/geojson/`, {
-        mode: "cors"
-      });
-      if (!resp.ok) return null;
-      return (await resp.json()) as GeoJSON.FeatureCollection;
-    } catch (error) {
-      return null;
-    }
-  };
+	const {
+		data: geojsonData,
+		isPending,
+		error,
+	} = useQuery({
+		queryKey: ['geojson'],
+		queryFn: fetchGeoJSON,
+		enabled: mapLoaded,
+	});
 
-  const displayMarkers = async (features: GeoJSON.FeatureCollection) => {
-    //Remove any existing markers before creating new ones
-    const existingMarkers = document.querySelectorAll(".marker");
-    existingMarkers.forEach((marker) => marker.remove());
-    const map = mapRef.current;
-    if (!map) return;
+	const { displayMarkers } = useMarkers(map, setActiveCluster);
 
-    for (const feature of features.features) {
-      const eventId = feature.properties?.["eventId"];
-      const iconURL = await generateImageURL(eventId, "icon");
+	// Initialize the Mapbox popup once
+	useEffect(() => {
+		if (mapLoaded && map && !popupRef.current) {
+			popupRef.current = new mapboxgl.Popup({
+				maxWidth: '75vw',
+				closeButton: false,
+			});
+		}
+	}, [mapLoaded, map]);
 
-      const coords =
-        feature.geometry.type === "Point" &&
-        (feature.geometry.coordinates as LngLatLike);
+	// Update popup content when activeCluster changes
+	useEffect(() => {
+		if (!map || !popupRef.current) return;
 
-      if (!coords) continue;
+		if (activeCluster && activeCluster.features.length === 1) {
+			popupRef.current.setDOMContent(popupContainerRef.current).setLngLat(activeCluster.features[0].geometry.coordinates).addTo(map);
+		} else {
+			popupRef.current.remove();
+		}
+	}, [map, activeCluster]);
 
-      const el = document.createElement("div");
-      el.className = "marker";
+	// Load markers when geojsonData is ready
+	useEffect(() => {
+		if (mapLoaded && map && geojsonData && !isPending) {
+			displayMarkers(geojsonData);
+		}
+	}, [mapLoaded, map, geojsonData, isPending, displayMarkers]);
 
-      if (iconURL) {
-        imageBlobURLs.current?.push(iconURL)
-        el.style.backgroundImage = `url(${iconURL})`;
-        el.style.border = "0.1rem solid white";
-      } else {
-        el.style.backgroundImage = `url("/map-marker-question.png")`;
-      }
+	// Handle map click to close popup
+	useEffect(() => {
+		if (!map) return;
+		const handleMapClick = () => setActiveCluster(null);
+		map.on('click', handleMapClick);
+		
+		return () => {
+			map.off('click', handleMapClick);
+		};
+	}, [map]);
 
-      el.style.width = "70px";
-      el.style.height = "70px";
-      el.style.backgroundSize = "100%";
-      el.style.display = "block";
-      // el.style.objectFit = "fill";
-
-      el.style.borderRadius = "50%";
-      el.style.cursor = "pointer";
-      el.style.padding = "0";
-
-      // Marker obj
-      const marker = new mapboxgl.Marker(el);
-      marker.setLngLat(coords).addTo(map);
-
-      // Instantiate a popup container to draw the popup
-      const popupContainer = document.createElement("div");
-      const root = createRoot(popupContainer);
-      root.render(
-        <Popup marker={feature.properties as markerPropertiesT} key={eventId} />
-      ); // render popup
-
-      popUpRef.current?.push(root); // store the popups to unmount them during cleanup
-      marker.setPopup(
-        new mapboxgl.Popup().setDOMContent(popupContainer).setMaxWidth("75vw")
-      );
-    }
-  };
-
-  useEffect(() => {
-    const accessToken: string = import.meta.env.VITE_MAPBOX_TOKEN as string;
-    if (!accessToken) alert("mapbox access token not initialized");
-    mapboxgl.accessToken = accessToken;
-
-    if (!mapContainerRef.current) {
-      console.error("Map container not initialized");
-      return;
-    }
-
-    mapRef.current = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      center: [-79.347015, 43.65107],
-      zoom: 10.5,
-      pitch: 62,
-      bearing: -20,
-    });
-
-    mapRef.current.on("load", async () => {
-      setMapLoaded(true);
-
-      const features = await fetchGeoJsonData();
-      if (features) {
-        await displayMarkers(features);
-      }
-    });
-
-    return () => {
-      popUpRef.current?.forEach((popup) => popup.unmount());
-      imageBlobURLs.current?.forEach((url) => URL.revokeObjectURL(url));
-      mapRef.current?.remove();
-    };
-  }, []);
-
-  return (
-    <>
-      <div id="map" ref={mapContainerRef} className="absolute inset-0" />
-      <header className="absolute top-0 left-0 z-10 pointer-events-none">
-        <h1>TO Events</h1>
-      </header>
-      {mapLoaded && <Options mapRef={mapRef} />}
-    </>
-  );
+	return (
+		<>
+			<div id="map" ref={mapContainerRef} className="absolute inset-0" />
+			{(!mapLoaded || isPending) && (
+				<div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+					<div>Loading...</div>
+				</div>
+			)}
+			{error && (
+				<div className="absolute inset-0 flex items-center justify-center bg-red-500 bg-opacity-50">
+					<div>An error has occurred: {error.message}</div>
+				</div>
+			)}
+			<header className="absolute top-0 left-0 z-10 pointer-events-none">
+				<h1>TO Events</h1>
+			</header>
+			{geojsonData && map && <Options mapRef={{ current: map }} />}
+			{activeCluster &&
+				(activeCluster.features.length > 1 ? (
+					<ClusterPopup cluster={activeCluster} />
+				) : (
+					createPortal(<Popup feature={activeCluster.features[0]} />, popupContainerRef.current)
+				))}
+		</>
+	);
 };

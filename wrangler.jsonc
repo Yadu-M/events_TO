@@ -31,17 +31,26 @@
 	],
 	"r2_buckets": [
 		{
-			"binding": "bucket",
-			"bucket_name": "eventto"
+			"bucket_name": "eventto",
+			"binding": "R2"
 		}
 	],
-
+	"ai": {
+		"binding": "AI"
+	},
+	"kv_namespaces": [
+		{
+			"binding": "KV",
+			"id": "d3174fa284e2410a92c94145022f431f"
+		}
+	],
 	/**
 	 * Environment Variables
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 	 */
 	"vars": {
-		"CITY_API_BASE_URL": "https://secure.toronto.ca/cc_sr_v1/data/edc_eventcal_APR?limit=500"
+		"CITY_API_BASE_URL": "https://secure.toronto.ca/cc_sr_v1/data/edc_eventcal_APR?limit=500",
+		"R2_BASE_URL": "https://r2.eventto.ca/"
 	}
 
 	/**

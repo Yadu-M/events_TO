@@ -13,11 +13,14 @@
 		"@cloudflare/vitest-pool-workers": "^0.7.7",
 		"@cloudflare/workers-types": "^4.20250303.0",
 		"@types/geojson": "^7946.0.16",
+		"@types/he": "^1.2.3",
+		"@types/react-dom": "^19.0.4",
 		"typescript": "^5.5.2",
 		"vitest": "3.0.8",
-		"wrangler": "^3.112.0"
+		"wrangler": "^4.4.0"
 	},
 	"dependencies": {
+		"he": "^1.2.0",
 		"zod": "^3.24.2"
 	}
 }
