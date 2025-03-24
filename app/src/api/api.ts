@@ -5,13 +5,13 @@ import { EventInfo, GeoJsonPayload } from '@/types';
 // Backend Calls
 
 export const fetchGeoJSON = async (): Promise<GeoJsonPayload> => {
-	const response = await fetch('/api/geojson');
+	const response = await fetch('https://api.eventto.ca/api/geojson');
 
 	return await response.json();
 };
 
 export const fetchEventInfo = async (eventId: number): Promise<EventInfo> => {
-	const response = await fetch(`/api/eventInfo?id=${eventId}`);
+	const response = await fetch(`https://api.eventto.ca/api/eventInfo?id=${eventId}`);
 
 	return await response.json();
 };

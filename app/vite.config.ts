@@ -8,15 +8,15 @@ export default defineConfig(() => {
 	// const env = loadEnv(mode, process.cwd(), '');
 	return {
 		plugins: [react()],
-		server: {
-			proxy: {
-				'/api': {
-					target: 'https://api.eventto.ca',
-					changeOrigin: true,
-					rewrite: (path) => path.replace(/^\/api/, ''),
-				},
-			},
-		},
+		// server: {
+		// 	proxy: {
+		// 		'/api': {
+		// 			target: 'https://api.eventto.ca',
+		// 			changeOrigin: true,
+		// 			rewrite: (path) => path.replace(/^\/api/, ''),
+		// 		},
+		// 	},
+		// },
 		resolve: {
 			alias: {
 				'@': path.resolve(__dirname, './src'),
