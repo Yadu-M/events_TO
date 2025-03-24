@@ -6,13 +6,12 @@ import path from 'path';
 export default defineConfig(({ mode }) => {
 	// Load env variables based on the mode (development, production, etc.)
 	const env = loadEnv(mode, process.cwd(), '');
-
 	return {
 		plugins: [react()],
 		server: {
 			proxy: {
 				'/api': {
-					target: env.VITE_API_URL,
+					target: 'https://api.eventto.ca',
 					changeOrigin: true,
 					rewrite: (path) => path.replace(/^\/api/, ''),
 				},
